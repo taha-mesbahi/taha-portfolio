@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-
 import { motion } from "framer-motion";
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
-import { db } from './firebase'
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { db } from './firebase';
+
 import { Mail, Phone, MapPin, Linkedin, Download, CheckCircle2, GraduationCap, Languages } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
