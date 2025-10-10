@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Impression propre A4 */
+@page { size: A4; margin: 10mm; }
+@media print {
+  header, .print\:hidden { display: none !important; }
+  main { padding: 0 !important; }
+  a { color: inherit; text-decoration: none; }
+  .shadow-xl, .shadow-sm { box-shadow: none !important; }
+}
