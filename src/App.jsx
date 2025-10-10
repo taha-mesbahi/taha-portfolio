@@ -605,7 +605,7 @@ export default function App() {
                 <svg className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none"><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" strokeWidth="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2"/></svg>
                 <input
                   value={searchTerm}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Rechercher une certification..."
                   className="rounded-xl bg-white pl-8 pr-3 py-2 text-sm outline-none placeholder:text-slate-400 border border-slate-200 focus:border-slate-400"
                 />
