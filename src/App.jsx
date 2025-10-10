@@ -43,6 +43,7 @@ const skills = {
     "Power BI",
     "AppSheet",
     "IBM SPSS",
+    "SAP (S/4HANA, BTP)"
   ],
   "Développement & Full‑Stack": [
     "JavaScript",
