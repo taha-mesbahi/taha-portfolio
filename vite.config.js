@@ -6,7 +6,9 @@ export default defineConfig({
   base: '/taha-portfolio/',
   build: {
     outDir: 'dist',
-    assetsDir: 'assets_v2', // 🔥 nouveau dossier d’assets pour forcer le refresh
+    assetsDir: 'assets_debug',
     emptyOutDir: true,
+    minify: false,          // ❌ Pas de minification -> code lisible
+    sourcemap: true,        // 🧭 Ajoute une carte des sources pour déboguer
   },
 })
