@@ -306,7 +306,7 @@ const Badge = ({ children }) => (
 );
 
 // === MAIN COMPONENT ===
-export default function Portfolio() {
+export default function App() {
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   useEffect(() => {
