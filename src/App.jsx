@@ -1,3 +1,7 @@
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import { auth, googleProvider } from './firebase'
+import { Shield, LogOut } from "lucide-react" // icônes admin
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from "framer-motion";
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
@@ -318,6 +322,41 @@ export default function App() {
     return ()=>unsub();
   }, []);
 
+  // état auth (pour l'icône)
+const [user, setUser] = useState(null)
+useEffect(() => {
+  const unsub = onAuthStateChanged(auth, (u) => setUser(u || null))
+  return () => unsub()
+}, [])
+
+// scroll doux vers une section sans casser le HashRouter
+const scrollToId = (id) => (e) => {
+  e.preventDefault()
+  const el = document.getElementById(id)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+// login + go admin
+const handleAdminClick = async () => {
+  try {
+    if (!user) await signInWithPopup(auth, googleProvider)
+    window.location.hash = '#/admin'
+  } catch (e) {
+    console.error(e)
+    alert("Connexion annulée ou refusée.")
+  }
+}
+
+const handleLogout = async () => {
+  try {
+    await signOut(auth)
+    alert('Déconnecté')
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+
   const [searchTerm, setSearchTerm] = useState("");
   const [domain, setDomain] = useState("Tous");
   const cvRef = useRef(null);
@@ -383,29 +422,54 @@ export default function App() {
             <span className="font-semibold tracking-wide">{profile.name}</span>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700">
-            <a href="#about" className="hover:text-slate-900">À propos</a>
-            <a href="#skills" className="hover:text-slate-900">Compétences</a>
-            <a href="#experience" className="hover:text-slate-900">Expériences</a>
-            <a href="#projects" className="hover:text-slate-900">Projets</a>
-            <a href="#certs" className="hover:text-slate-900">Certifications</a>
-            <a href="#education" className="hover:text-slate-900">Éducation</a>
-            <a href="#contact" className="hover:text-slate-900">Contact</a>
+            <a href="#about" onClick={scrollToId('about')} className="hover:text-slate-900">À propos</a>
+            <a href="#skills" onClick={scrollToId('skills')} className="hover:text-slate-900">Compétences</a>
+            <a href="#experience" onClick={scrollToId('experience')} className="hover:text-slate-900">Expériences</a>
+            <a href="#projects" onClick={scrollToId('projects')} className="hover:text-slate-900">Projets</a>
+            <a href="#certs" onClick={scrollToId('certs')} className="hover:text-slate-900">Certifications</a>
+            <a href="#education" onClick={scrollToId('education')} className="hover:text-slate-900">Éducation</a>
+            <a href="#contact" onClick={scrollToId('contact')} className="hover:text-slate-900">Contact</a>
           </nav>
+
           <div className="flex items-center gap-2">
-            <a
-              href={profile.linkedin}
-              target="_blank"
-              className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
-            >
-              <Linkedin className="h-4 w-4" /> LinkedIn
-            </a>
-            <button
-              onClick={downloadPDF}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-3 py-2 text-sm font-semibold shadow-sm hover:bg-slate-800"
-            >
-              <Download className="h-4 w-4" /> Télécharger PDF
-            </button>
-          </div>
+  <a
+    href={profile.linkedin}
+    target="_blank"
+    className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
+  >
+    <Linkedin className="h-4 w-4" /> LinkedIn
+  </a>
+
+  {/* Icône Admin : clique = login Google puis redirection #/admin */}
+  <button
+    onClick={handleAdminClick}
+    title={user ? "Aller à l'admin" : "Se connecter (Admin)"}
+    className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 hover:bg-slate-50"
+    aria-label="Admin"
+  >
+    <Shield className="h-4 w-4" />
+  </button>
+
+  {/* (Optionnel) bouton logout si connecté */}
+  {user && (
+    <button
+      onClick={handleLogout}
+      title="Se déconnecter"
+      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 hover:bg-slate-50"
+      aria-label="Logout"
+    >
+      <LogOut className="h-4 w-4" />
+    </button>
+  )}
+
+  <button
+    onClick={downloadPDF}
+    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-3 py-2 text-sm font-semibold shadow-sm hover:bg-slate-800"
+  >
+    <Download className="h-4 w-4" /> Télécharger PDF
+  </button>
+</div>
+
         </div>
       </header>
 
