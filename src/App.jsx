@@ -318,7 +318,7 @@ export default function App() {
     return ()=>unsub();
   }, []);
 
-  const [query, setQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [domain, setDomain] = useState("Tous");
   const cvRef = useRef(null);
 
@@ -326,12 +326,12 @@ export default function App() {
     return certifications
       .filter((c) => (domain === "Tous" ? true : c.domain === domain))
       .filter((c) =>
-        query.trim()
-          ? (c.title + c.org + c.domain).toLowerCase().includes(query.toLowerCase())
+        searchTerm.trim()
+          ? (c.title + c.org + c.domain).toLowerCase().includes(searchTerm.toLowerCase())
           : true
       )
       .sort((a, b) => (a.domain > b.domain ? 1 : -1));
-  }, [query, domain]);
+  }, [searchTerm, domain]);
 
   const domains = ["Tous", ...Array.from(new Set(certifications.map((c) => c.domain)))];
 
@@ -544,7 +544,7 @@ export default function App() {
               <div className="relative">
                 <svg className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none"><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" strokeWidth="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2"/></svg>
                 <input
-                  value={query}
+                  value={searchTerm}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Rechercher une certification..."
                   className="rounded-xl bg-white pl-8 pr-3 py-2 text-sm outline-none placeholder:text-slate-400 border border-slate-200 focus:border-slate-400"
