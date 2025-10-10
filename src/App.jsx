@@ -515,26 +515,86 @@ export default function App() {
 
         {/* PROJECTS */}
         <section id="projects" className="py-6">
-          <h2 className="text-2xl font-bold mb-4 text-slate-900">Projets sélectionnés</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {projects.map((p, idx) => (
-              <GlassCard key={idx}>
-                <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
-                <p className="mt-2 text-slate-800">{p.description}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {p.stack.map((s) => (
-                    <Badge key={s}>{s}</Badge>
-                  ))}
-                </div>
-                {p.impact?.length ? (
-                  <div className="mt-3 text-sm text-slate-700">
-                    <span className="font-semibold">Impact :</span> {p.impact.join(" • ")}
-                  </div>
-                ) : null}
-              </GlassCard>
+  <h2 className="text-2xl font-bold mb-4 text-slate-900">Projets sélectionnés</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    {projects.map((p, idx) => (
+      <GlassCard key={p.id || idx}>
+        {/* Image principale */}
+        {p.mainImageUrl ? (
+          <img
+            src={p.mainImageUrl}
+            alt={p.name}
+            loading="lazy"
+            className="w-full h-40 md:h-48 object-cover rounded-lg mb-3"
+          />
+        ) : null}
+
+        <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
+        <p className="mt-2 text-slate-800">{p.description}</p>
+
+        {/* Stack */}
+        {Array.isArray(p.stack) && p.stack.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {p.stack.map((s, i) => (
+              <Badge key={i}>{s}</Badge>
             ))}
           </div>
-        </section>
+        )}
+
+        {/* Impact */}
+        {Array.isArray(p.impact) && p.impact.length > 0 && (
+          <div className="mt-3 text-sm text-slate-700">
+            <span className="font-semibold">Impact :</span> {p.impact.join(" • ")}
+          </div>
+        )}
+
+        {/* Galerie d’images */}
+        {Array.isArray(p.galleryUrls) && p.galleryUrls.length > 0 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto">
+            {p.galleryUrls.map((u, i) => (
+              <img
+                key={i}
+                src={u}
+                alt={`${p.name} ${i + 1}`}
+                loading="lazy"
+                className="h-16 w-24 object-cover rounded-md flex-none border border-slate-200"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* PDFs avec thumbnails */}
+        {Array.isArray(p.pdfs) && p.pdfs.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            {p.pdfs.map((pdf, i) => (
+              <a
+                key={i}
+                href={pdf.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 border border-slate-200 rounded-lg p-2 hover:bg-slate-50"
+                title={pdf.name}
+              >
+                {pdf.thumbUrl ? (
+                  <img
+                    src={pdf.thumbUrl}
+                    alt={pdf.name}
+                    loading="lazy"
+                    className="h-12 w-9 object-cover rounded"
+                  />
+                ) : (
+                  <span className="text-xs">PDF</span>
+                )}
+                <span className="text-xs truncate">{pdf.name}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </GlassCard>
+    ))}
+  </div>
+</section>
+
 
         {/* CERTIFICATIONS */}
         <section id="certs" className="py-6">
