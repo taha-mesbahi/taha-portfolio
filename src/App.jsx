@@ -521,10 +521,14 @@ const handleLogout = async () => {
                     <MapPin className="mr-2 h-3 w-3" /> {profile.location}
                   </Badge>
                   <Badge>
-                    <Mail className="mr-2 h-3 w-3" /> {profile.email}
+                    <a href={`mailto:${profile.email}`} className="flex items-center hover:underline">
+                      <Mail className="mr-2 h-3 w-3" /> {profile.email}
+                    </a>
                   </Badge>
                   <Badge>
-                    <Phone className="mr-2 h-3 w-3" /> {profile.phone}
+                    <a href={`tel:${profile.phone.replace(/\s+/g, '')}`} className="flex items-center hover:underline">
+                       <Phone className="mr-2 h-3 w-3" /> {profile.phone}
+                    </a>
                   </Badge>
                   <Badge>{profile.availability}</Badge>
                 </div>
