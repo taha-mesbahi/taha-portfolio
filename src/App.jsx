@@ -19,7 +19,7 @@ const profile = {
   subtitle:
     "Apprenti ingénieur (INSA Rouen). Optimisation de process, analytics temps réel, apps métiers sécurisées et cyber‑résilience.",
   location: "Rouen, Normandie, France",
-  email: "tahamesbahi123@gmail.com",
+  email: `mailto:${profile.email}`,
   phone: "+33 6 99 72 31 51",
   linkedin: "https://www.linkedin.com/in/tahamesbahi",
   availability: "Ouvert aux opportunités — alternance / CDI",
