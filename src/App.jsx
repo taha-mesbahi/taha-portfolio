@@ -1,7 +1,6 @@
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { auth, googleProvider } from './firebase'
 import { Shield, LogOut } from "lucide-react" // icônes admin
-import { Moon, Sun } from "lucide-react";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from "framer-motion";
@@ -11,21 +10,6 @@ import { db } from './firebase';
 import { Mail, Phone, MapPin, Linkedin, Download, CheckCircle2, GraduationCap, Languages } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-
-
-// Thème : light/dark synchronisé OS + localStorage
-const [theme, setTheme] = useState(() => {
-  const saved = localStorage.getItem('theme');
-  if (saved) return saved;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-});
-useEffect(() => {
-  const root = document.documentElement;
-  if (theme === 'dark') root.classList.add('dark');
-  else root.classList.remove('dark');
-  localStorage.setItem('theme', theme);
-}, [theme]);
-const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
 
 // === CONFIGURABLE DATA ===
 const profile = {
