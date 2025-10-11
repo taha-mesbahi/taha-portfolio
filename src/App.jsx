@@ -336,6 +336,32 @@ const scrollToId = (id) => (e) => {
   const el = document.getElementById(id)
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
+// Lightbox (plein écran)
+const [lightbox, setLightbox] = useState({ open:false, images:[], index:0 });
+const [zoom, setZoom] = useState(1);
+
+const openLightbox = (images, index=0) =>
+  setLightbox({ open:true, images, index });
+
+const closeLightbox = () => setLightbox(l => ({ ...l, open:false }));
+const prevImage   = () => setLightbox(l => ({ ...l, index:(l.index - 1 + l.images.length) % l.images.length }));
+const nextImage   = () => setLightbox(l => ({ ...l, index:(l.index + 1) % l.images.length }));
+
+// clavier: ESC / ← / →
+useEffect(() => {
+  if (!lightbox.open) return;
+  const onKey = (e) => {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'ArrowRight') nextImage();
+  };
+  window.addEventListener('keydown', onKey);
+  return () => window.removeEventListener('keydown', onKey);
+}, [lightbox.open]);
+
+// reset zoom à chaque image / ouverture
+useEffect(() => { if (lightbox.open) setZoom(1) }, [lightbox.index, lightbox.open]);
+
 
 // login + go admin
 const handleAdminClick = async () => {
@@ -590,9 +616,11 @@ const handleLogout = async () => {
             src={p.mainImageUrl}
             alt={p.name}
             loading="lazy"
-            className="w-full h-40 md:h-48 object-cover rounded-lg mb-3"
+            onClick={() => openLightbox([p.mainImageUrl, ...(p.galleryUrls || [])], 0)}
+            className="w-full h-40 md:h-48 object-cover rounded-lg mb-3 cursor-zoom-in"
           />
         ) : null}
+
 
         <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
         <p className="mt-2 text-slate-800">{p.description}</p>
@@ -615,18 +643,19 @@ const handleLogout = async () => {
 
         {/* Galerie d’images */}
         {Array.isArray(p.galleryUrls) && p.galleryUrls.length > 0 && (
-          <div className="mt-3 flex gap-2 overflow-x-auto">
-            {p.galleryUrls.map((u, i) => (
-              <img
-                key={i}
-                src={u}
-                alt={`${p.name} ${i + 1}`}
-                loading="lazy"
-                className="h-16 w-24 object-cover rounded-md flex-none border border-slate-200"
-              />
-            ))}
-          </div>
-        )}
+  <div className="mt-3 flex gap-2 overflow-x-auto">
+    {p.galleryUrls.map((u, i) => (
+      <img
+        key={i}
+        src={u}
+        alt={`${p.name} ${i + 1}`}
+        loading="lazy"
+        onClick={() => openLightbox([p.mainImageUrl, ...(p.galleryUrls || [])], i + 1)}
+        className="h-16 w-24 object-cover rounded-md flex-none border border-slate-200 cursor-zoom-in"
+      />
+    ))}
+  </div>
+)}
 
         {/* PDFs avec thumbnails */}
         {Array.isArray(p.pdfs) && p.pdfs.length > 0 && (
@@ -765,6 +794,62 @@ const handleLogout = async () => {
           .bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] { background: white !important; }
         }
       `}</style>
+      {lightbox.open && (
+  <div
+    className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center"
+    role="dialog"
+    aria-modal="true"
+    onClick={closeLightbox} // clic sur le fond = fermer
+  >
+    {/* Conteneur image (stop propagation pour ne pas fermer en cliquant sur l'image) */}
+    <div
+      className="relative max-w-[92vw] max-h-[92vh] overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Boutons */}
+      <button
+        onClick={closeLightbox}
+        className="absolute -top-12 right-0 md:top-3 md:right-3 rounded-full bg-white/10 hover:bg-white/20 text-white px-3 py-1"
+        title="Fermer (Esc)"
+      >
+        ✕
+      </button>
+      {lightbox.images.length > 1 && (
+        <>
+          <button
+            onClick={prevImage}
+            className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/20 text-white px-3 py-2"
+            title="Précédent (←)"
+          >
+            ‹
+          </button>
+          <button
+            onClick={nextImage}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/20 text-white px-3 py-2"
+            title="Suivant (→)"
+          >
+            ›
+          </button>
+        </>
+      )}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-white/80 text-xs">
+        {lightbox.index + 1} / {lightbox.images.length} — double-clic pour zoomer
+      </div>
+
+      {/* Image */}
+      <img
+        src={lightbox.images[lightbox.index]}
+        alt=""
+        className="max-w-[92vw] max-h-[92vh] object-contain select-none transition-transform duration-200 cursor-zoom-out"
+        style={{ transform: `scale(${zoom})` }}
+        onDoubleClick={() => setZoom((z) => (z === 1 ? 2 : 1))}
+        draggable={false}
+        onClick={nextImage} // clic sur l'image = suivante
+      />
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
