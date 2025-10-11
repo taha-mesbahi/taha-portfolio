@@ -292,23 +292,233 @@ const certifications = [
 ];
 
 // === UI HELPERS (LIGHT / MINIMAL) ===
+// === HOLO CARD (remplace GlassCard) ===
 const GlassCard = ({ className = "", children }) => (
-  <div
+  <motion.div
+    initial={{ opacity: 0, y: 18, scale: 0.98 }}
+    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+    viewport={{ once: true, amount: 0.2 }}
+    whileHover={{ y: -4, rotateX: 2, rotateY: -2 }}
+    transition={{ type: "spring", stiffness: 160, damping: 18 }}
     className={
-      "relative rounded-2xl border border-slate-200 bg-white/60 p-6 shadow-xl backdrop-blur-xl " +
-      className
-    }
+  "holo-card group relative rounded-2xl border border-white/20 bg-white/60 p-6 shadow-xl backdrop-blur-xl " +
+  "hover:shadow-[0_20px_60px_-20px_rgba(59,130,246,.35)] will-change-transform " + className
+}
+
   >
-    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/70 via-white/40 to-transparent pointer-events-none" />
+    {/* halo intérieur */}
+    <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/60 via-white/30 to-transparent" />
+    {/* Aurora blobs */}
+<div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+  <div className="aurora one" />
+  <div className="aurora two" />
+</div>
+
+    {/* bordure conique animée */}
+    <div className="pointer-events-none absolute -inset-px rounded-2xl holo-border" />
     <div className="relative z-10">{children}</div>
-  </div>
+  </motion.div>
 );
+
 
 const Badge = ({ children }) => (
   <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-medium text-slate-800">
     {children}
   </span>
 );
+
+function GridBackground() {
+  return (
+    <div
+      className="fixed inset-0 -z-10"
+      style={{
+        backgroundColor: "#0f172a",
+        backgroundImage: `
+          linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+        `,
+        backgroundSize: "40px 40px",
+        backgroundAttachment: "fixed"
+      }}
+    />
+  );
+}
+
+
+
+function HyperspaceBg() {
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
+
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let w = 0, h = 0;
+    let rafId = 0;
+    let particles = [];
+    let t = 0;
+
+    let targetMX = 0, targetMY = 0; // cible (pointeur)
+    let mx = 0, my = 0;             // lissé
+
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function resize() {
+      const { clientWidth, clientHeight } = canvas;
+      w = clientWidth;
+      h = clientHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // densité adaptative
+      const base = Math.round((w * h) / 14000);
+      const count = Math.max(60, Math.min(160, base));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.8 + 0.3
+      }));
+    }
+
+    function tick() {
+      t += 1 / 60;
+
+      // fondu du canvas
+      ctx.clearRect(0, 0, w, h);
+
+      // nappes nébuleuses (super cheap)
+      ctx.globalCompositeOperation = "lighter";
+      const g1 = ctx.createRadialGradient(
+        w * 0.3 + Math.sin(t * 0.15) * 40,
+        h * 0.25 + Math.cos(t * 0.12) * 30,
+        0,
+        w * 0.3,
+        h * 0.25,
+        Math.max(w, h) * 0.8
+      );
+      g1.addColorStop(0, "rgba(99,102,241,0.10)");   // indigo
+      g1.addColorStop(1, "rgba(99,102,241,0.00)");
+      ctx.fillStyle = g1;
+      ctx.fillRect(0, 0, w, h);
+
+      const g2 = ctx.createRadialGradient(
+        w * 0.75 + Math.cos(t * 0.11) * 50,
+        h * 0.65 + Math.sin(t * 0.14) * 40,
+        0,
+        w * 0.75,
+        h * 0.65,
+        Math.max(w, h) * 0.9
+      );
+      g2.addColorStop(0, "rgba(34,211,238,0.08)");   // cyan
+      g2.addColorStop(1, "rgba(34,211,238,0.00)");
+      ctx.fillStyle = g2;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.globalCompositeOperation = "source-over";
+
+      // lissage du parallax
+      mx += (targetMX - mx) * 0.06;
+      my += (targetMY - my) * 0.06;
+
+      // update particules
+      for (const p of particles) {
+        p.x += p.vx + mx * 0.6;
+        p.y += p.vy + my * 0.6;
+        if (p.x < -10) p.x = w + 10;
+        if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10;
+        if (p.y > h + 10) p.y = -10;
+      }
+
+      // lignes de connexion (budget limité)
+      let lines = 0;
+      const maxLines = particles.length * 3;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        for (let j = i + 1; j < particles.length; j++) {
+          const q = particles[j];
+          const dx = p.x - q.x, dy = p.y - q.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < 110 * 110) {
+            const a = 1 - d2 / (110 * 110);
+            ctx.strokeStyle = `rgba(56,189,248,${0.08 * a})`; // cyan
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.stroke();
+            if (++lines > maxLines) break;
+          }
+        }
+        if (lines > maxLines) break;
+      }
+
+      // points lumineux
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(168,85,247,0.35)"; // purple
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      rafId = requestAnimationFrame(tick);
+    }
+
+    // pointer parallax
+    function onPointerMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      const nx = (e.clientX - rect.left) / rect.width;
+      const ny = (e.clientY - rect.top) / rect.height;
+      targetMX = (nx - 0.5);
+      targetMY = (ny - 0.5);
+    }
+
+    // init
+    resize();
+    if (!prefersReduced) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      rafId = requestAnimationFrame(tick);
+    } else {
+      // fallback statique (dessine 1 frame)
+      tick();
+    }
+    window.addEventListener("resize", resize);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onPointerMove);
+    };
+  }, []);
+
+  return (
+    <>
+      <canvas
+        id="hyperspace-bg"
+        ref={ref}
+        className="fixed inset-0 -z-10"
+        aria-hidden
+      />
+      {/* léger vignettage pour la lisibilité du contenu */}
+      <div
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(1200px 600px at 50% 10%, rgba(255,255,255,.25), transparent 60%)"
+        }}
+        aria-hidden
+      />
+    </>
+  );
+}
 
 // === MAIN COMPONENT ===
 export default function App() {
@@ -440,6 +650,10 @@ const handleLogout = async () => {
         className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,rgba(2,6,23,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(2,6,23,0.04)_1px,transparent_1px)] bg-[size:24px_24px]"
         aria-hidden
       />
+      <GridBackground />
+
+      <HyperspaceBg />
+
 
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-slate-200 print:hidden">
@@ -452,7 +666,7 @@ const handleLogout = async () => {
             <a href="#about" onClick={scrollToId('about')} className="hover:text-slate-900">À propos</a>
             <a href="#skills" onClick={scrollToId('skills')} className="hover:text-slate-900">Compétences</a>
             <a href="#experience" onClick={scrollToId('experience')} className="hover:text-slate-900">Expériences</a>
-            <a href="#projects" onClick={scrollToId('projects')} className="hover:text-slate-900">Projets</a>
+            <a href="#projects" onClick={scrollToId('projects')} className="navlink">Projets</a>
             <a href="#certs" onClick={scrollToId('certs')} className="hover:text-slate-900">Certifications</a>
             <a href="#education" onClick={scrollToId('education')} className="hover:text-slate-900">Éducation</a>
             <a href="#contact" onClick={scrollToId('contact')} className="hover:text-slate-900">Contact</a>
@@ -512,9 +726,11 @@ const handleLogout = async () => {
               className="md:col-span-7"
             >
               <GlassCard>
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-slate-900">
-                  {profile.title}
-                </h1>
+               <h1 className="text-3xl md:text-4xl font-bold leading-tight">
+  <span className="animated-gradient-text">{profile.title}</span>
+</h1>
+
+
                 <p className="mt-3 text-slate-700">{profile.subtitle}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge>
@@ -617,12 +833,15 @@ const handleLogout = async () => {
         {/* Image principale */}
         {p.mainImageUrl ? (
           <img
-            src={p.mainImageUrl}
-            alt={p.name}
-            loading="lazy"
-            onClick={() => openLightbox([p.mainImageUrl, ...(p.galleryUrls || [])], 0)}
-            className="w-full h-40 md:h-48 object-cover rounded-lg mb-3 cursor-zoom-in"
-          />
+  src={p.mainImageUrl}
+  alt={p.name}
+  loading="lazy"
+  onClick={() => openLightbox([p.mainImageUrl, ...(p.galleryUrls || [])], 0)}
+  className="w-full h-40 md:h-48 object-cover rounded-lg mb-3 cursor-zoom-in
+             transition-transform duration-500 ease-out will-change-transform
+             group-hover:scale-[1.03]"
+/>
+
         ) : null}
 
 
@@ -655,7 +874,9 @@ const handleLogout = async () => {
         alt={`${p.name} ${i + 1}`}
         loading="lazy"
         onClick={() => openLightbox([p.mainImageUrl, ...(p.galleryUrls || [])], i + 1)}
-        className="h-16 w-24 object-cover rounded-md flex-none border border-slate-200 cursor-zoom-in"
+        className="h-16 w-24 object-cover rounded-md flex-none border border-slate-200 cursor-zoom-in
+           transition-transform duration-400 hover:scale-[1.05]"
+
       />
     ))}
   </div>
@@ -797,7 +1018,140 @@ const handleLogout = async () => {
           .shadow-xl, .shadow-sm { box-shadow: none !important; }
           .bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] { background: white !important; }
         }
+          /* ---- Holo border (version light, aucune anim par défaut) ---- */
+.holo-border::before{
+  content:"";
+  position:absolute; inset:0; border-radius:1rem;
+  padding:1px;
+  background: linear-gradient(90deg,
+    rgba(59,130,246,.35),
+    rgba(34,211,238,.35),
+    rgba(168,85,247,.35),
+    rgba(59,130,246,.35)
+  );
+  background-size: 300% 100%;
+  /* masque pour ne garder que la bordure */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: .75;
+}
+/* Anime SEULEMENT au hover (bien moins coûteux qu’un spin continu) */
+.group:hover .holo-border::before{
+  animation: border-slide 10s ease-in-out infinite alternate;
+}
+@keyframes border-slide {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* ---- Aurora (fortement allégé) ---- */
+.aurora{
+  position:absolute; width:60vmax; height:60vmax;
+  filter: blur(24px); opacity:.30; pointer-events:none;
+  background:
+    radial-gradient(35% 35% at 50% 50%, rgba(99,102,241,.45), transparent 60%),
+    radial-gradient(35% 35% at 30% 70%, rgba(34,211,238,.35), transparent 60%),
+    radial-gradient(45% 45% at 70% 30%, rgba(236,72,153,.32), transparent 60%);
+  /* pas d’anim par défaut */
+  animation: none;
+}
+.aurora.one{ top:-20vmax; left:15vw; }
+.aurora.two{ bottom:-25vmax; right:-10vw; }
+
+/* Active l’anim seulement sur grands écrans */
+@media (min-width: 1024px){
+  .aurora{
+    animation: aurora-float 26s ease-in-out infinite alternate;
+  }
+}
+@keyframes aurora-float{
+  0%{ transform: translateY(0) translateX(0) scale(1); }
+  100%{ transform: translateY(-28px) translateX(14px) scale(1.03); }
+}
+
+/* ---- Micro-perf tweaks ---- */
+.holo-card{
+  /* évite layout/repaint hors écran (Chrome/Edge) */
+  content-visibility: auto;
+  contain: layout paint style;
+}
+/* n’applique will-change qu’au survol */
+.holo-card:hover{ will-change: transform; }
+
+/* Stats shimmer OK (inchangé) */
+.num-shimmer{
+  background: linear-gradient(90deg, rgba(255,255,255,.9), rgba(59,130,246,.55), rgba(236,72,153,.55));
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: gradient-move 6s ease infinite;
+}
+@keyframes gradient-move {
+  0%{ background-position: 0% 50%;}
+  50%{ background-position: 100% 50%;}
+  100%{ background-position: 0% 50%;}
+}
+
+/* Respecte l’accessibilité */
+@media (prefers-reduced-motion: reduce){
+  .group:hover .holo-border::before,
+  .aurora,
+  .num-shimmer{ animation: none !important; }
+}
+  /* ====== Gradient title ====== */
+.animated-gradient-text {
+  display: inline-block;
+  background: linear-gradient(90deg,
+    #4f46e5 0%,
+    #06b6d4 30%,
+    #a855f7 60%,
+    #ef4444 90%);
+  background-size: 400% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 8s linear infinite;
+  will-change: background-position;
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes title-sheen {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+
+/* Accessibilité & impression */
+@media (prefers-reduced-motion: reduce){
+  .animated-gradient-text{ animation: none !important; }
+}
+@media print{
+  .animated-gradient-text{
+    background: none !important;
+    color: #111 !important;   /* lisible sur papier */
+  }
+}
+  @media print {
+  #hyperspace-bg { display: none !important; }
+}
+
+/* optionnel : renforce le contraste du contenu si besoin */
+.bg-content {
+  background: linear-gradient(to bottom, rgba(255,255,255,.65), rgba(255,255,255,.65));
+  backdrop-filter: blur(6px);
+}
+
+
+
       `}</style>
+      
       {lightbox.open && (
   <div
     className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center"
