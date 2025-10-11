@@ -1,6 +1,7 @@
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { auth, googleProvider } from './firebase'
 import { Shield, LogOut } from "lucide-react" // icônes admin
+import { Moon, Sun } from "lucide-react";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from "framer-motion";
@@ -46,18 +47,19 @@ const skills = {
     "SAP (S/4HANA, BTP)"
   ],
   "Développement & Full‑Stack": [
-    "JavaScript",
-    "TypeScript",
-    "Node.js",
+     "Node.js",
     "PHP",
     "Vue.js",
-    "HTML/CSS",
-    "Java",
+    "JavaScript",
+    "TypeScript",
+    "HTML",
+    "CSS",
     "C",
+    "Java",
     "Matlab/Scilab",
     "UML",
     "Git",
-    "LaTeX",
+    "LaTeX"
   ],
   "IoT & Industrie 4.0": [
     "Node‑RED",
@@ -70,10 +72,31 @@ const skills = {
     "Step7, WinCC",
     "Grafana",
   ],
+  "Automatisation & No-Code": [
+    "n8n",
+    "Zapier",
+    "Automatisation de workflows",
+    "AppSheet"
+     ],
+     "IA & Conversationnels": [
+    "IA prompting",
+    "VAPI",
+    "Twilio",
+    "ElevenLabs",
+    "Agents conversationnels intégrés aux systèmes métiers"
+  ],
+   "UX & Design": [
+    "Figma (prototypage, design system)",
+    "Adobe Illustrator",
+    "Adobe Premiere Pro",
+    "WordPress",
+    "Shopify"
+  ],
   "Cybersécurité & Réseau": [
     "ISO/IEC 27001",
     "RGPD / GDPR",
     "SOC 2 / NIS",
+    "AI Act",
     "OSINT",
     "Wireshark",
     "GNU/Linux Hardening",
@@ -82,16 +105,27 @@ const skills = {
     "Kali Suite (pentest)",
   ],
   "Gestion de projet": [
-    "Agile / Scrum",
-    "Lean / Six Sigma",
+   "Six Sigma",
+    "Lean",
+    "Méthodologies agiles (Scrum)",
+    "PMP",
     "DMAIC",
     "GANTT / WBS",
-    "AMDEC / 8D / 5S",
+    "AMDEC",
+    "8D",
+    "5S",
     "Kaizen",
     "BSC",
-    "ISO 9001:2015",
+    "ISO 9001:2015"
   ],
-  "Design & Outils": ["Figma", "Adobe Illustrator", "Premiere Pro", "WordPress", "Shopify"],
+ "Soft skills": [
+    "Leadership",
+    "Communication",
+    "Médiation",
+    "Gestion du temps",
+    "Adaptabilité",
+    "Pédagogie"
+  ]
 };
 
 const experiences = [
@@ -522,6 +556,7 @@ function HyperspaceBg() {
 
 // === MAIN COMPONENT ===
 export default function App() {
+  
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   useEffect(() => {
