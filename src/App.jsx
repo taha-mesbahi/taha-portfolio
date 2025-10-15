@@ -147,6 +147,22 @@ const experiences = [
     tags: ["Data", "Industrie 4.0", "Full-Stack", "Cyberdéfense", "KPI"],
   },
   {
+    company: "Fnac Darty",
+    logo: "logos/fnacdarty.jpeg",
+    link: "https://www.fnacdarty.com/",
+    role: "Ingénieur Déploiement Réseau & Systèmes — Ouverture DARTY Rouen Docks 76",
+    period: "Août 2025 — Aujourd’hui",
+    location: "Rouen, Normandie, France (sur site)",
+    bullets: [
+      "Mission courte d’ouverture d’un nouveau magasin Darty : pré-visite, cadrage technique, plan d’action et coordination multi-équipes.",
+      "Câblage structuré Cat6A : terminaison T568B, étiquetage TIA-606-C, certification Fluke DSX, PV et dossiers de recette complets.",
+      "Sécurité réseau : ACL minimales, politique deny-all, segmentation VLAN, NTP/syslog, sauvegardes automatiques de configuration.",
+      "Intégration LAN/Wi-Fi : switches cœur/accès PoE, SFP+, LLDP/STP, QoS retail, AP entreprise, SSID Pro (802.1X) / Guest isolé.",
+      "Recette technique complète : cuivre, LAN, Wi-Fi, TPE, impression, tests bout-en-bout et handover documenté.",
+    ],
+    tags: ["Réseau", "Systèmes", "Sécurité", "Déploiement", "Retail"],
+  },
+  {
     company: "IM Discounts",
     logo: "logos/im-discounts.svg",
     link: "https://www.im-discounts-normandie.fr/",
@@ -163,13 +179,15 @@ const experiences = [
     company: "8th Sense Group",
     logo: "logos/8thsensegrp.png",
     link: "https://8thsensegroup.ca/",
-    role: "Sales Representative (Commerce international)",
+    role: "Sales Representative — Commerce international (commodities)",
     period: "Nov. 2022 — Fév. 2024",
     location: "Toronto (remote)",
     bullets: [
-      "Négociation et closing de contrats de négoce international (commodities, matières premières).",
+      "Closing et négoce de deals matières premières (minerais, pétrole, phosphate/OCP), gestion NCNDA, LC/LOC, Incoterms et due diligence.",
+      "Travail rigoureux sur la conformité et la contractualisation (KYC, AML, sanctions lists).",
+      "Rigueur contractuelle, gestion d’interdépendances, négociation multi-acteurs et mitigation des risques.",
     ],
-    tags: ["Commerce", "Négociation"],
+    tags: ["Commerce", "Contrats", "Due Diligence", "Risque"],
   },
   {
     company: "Planet Of Morocco",
@@ -196,6 +214,7 @@ const experiences = [
     tags: ["Qualité", "PLC"],
   },
 ];
+
 
 
 const projects = [
