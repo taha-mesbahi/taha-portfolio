@@ -263,11 +263,15 @@ const education = [
     degree:
       "Ingénieur — Performance Numérique Industrielle (Industrie 4.0, cybersécurité)",
     period: "2022 — 2026",
+    logo: "logos/insarouen.jpg",
+    link: "https://www.insa-rouen.fr/",
   },
   {
-    school: "INSA Euro‑Méditerranée, Fès (Maroc)",
+    school: "INSA Euro-Méditerranée, Fès (Maroc)",
     degree: "Diplôme d’Ingénieur — Informatique",
     period: "2019 — 2022",
+    logo: "logos/INSA_Euro-Mediterranee_Fes.png",
+    link: "https://www.ueuromed.org/sites/default/files/2020-05/brochure-insa-dv.pdf",
   },
   {
     school: "Baccalauréat — Sciences Mathématiques (Option Française)",
@@ -275,6 +279,7 @@ const education = [
     period: "2019",
   },
 ];
+
 
 const languages = [
   { name: "Français", level: "C1 (DALF 89/100)" },
