@@ -132,31 +132,37 @@ const skills = {
 const experiences = [
   {
     company: "Ampère (Renault Group)",
-    role: "Apprenti ingénieur Data & Développeur Full‑Stack",
+    logo: "logos/ampere-renault.png",
+    link: "https://www.ampere.cars/",
+    role: "Apprenti ingénieur Data & Développeur Full-Stack",
     period: "Sept. 2023 — Juin 2025",
     location: "Cléon (hybride)",
     bullets: [
-      "Pilotage de l’analyse de données et optimisation des processus sur lignes moteurs électriques (6AM, 5AX, E‑Tech).",
+      "Pilotage de l’analyse de données et optimisation des processus sur lignes moteurs électriques (6AM, 5AX, E-Tech).",
       "Dashboards KPI temps réel (AppSheet, GCP, Looker, Spotfire, BigQuery) : +37% de rapidité, 80% d’erreurs en moins, 130 k€ d’économies/an.",
       "Refonte des workflows Excel → plateforme web WMS sécurisée (Node.js, PHP, MySQL, Vue.js), SSO et gestion fine des accès.",
       "Cybersécurité industrielle : remédiation CVEs critiques, système d’alertes ESD (Python, Selenium, capteurs Keyence) validant l’audit ESD 2024.",
       "Améliorations additionnelles aboutissant à jusqu’à 420 k€ d’économies annuelles cumulées.",
     ],
-    tags: ["Data", "Industrie 4.0", "Full‑Stack", "Cyberdéfense", "KPI"],
+    tags: ["Data", "Industrie 4.0", "Full-Stack", "Cyberdéfense", "KPI"],
   },
   {
     company: "IM Discounts",
-    role: "Ingénieur Projet Logistique‑IT",
+    logo: "logos/im-discounts.svg",
+    link: "https://www.im-discounts-normandie.fr/",
+    role: "Ingénieur Projet Logistique-IT",
     period: "Juil. 2023 — Nov. 2023",
     location: "Canteleu",
     bullets: [
       "Développement et déploiement de ‘Stock Pro’ (SaaS CRM/WMS/ERP) pour entrepôts agroalimentaires.",
-      "+32% d’efficacité opérationnelle (automatisation, contrôle financier, time‑to‑delivery).",
+      "+32% d’efficacité opérationnelle (automatisation, contrôle financier, time-to-delivery).",
     ],
     tags: ["SaaS", "WMS", "ERP", "Automation"],
   },
   {
     company: "8th Sense Group",
+    logo: "logos/8thsensegrp.png",
+    link: "https://8thsensegroup.ca/",
     role: "Sales Representative (Commerce international)",
     period: "Nov. 2022 — Fév. 2024",
     location: "Toronto (remote)",
@@ -167,6 +173,8 @@ const experiences = [
   },
   {
     company: "Planet Of Morocco",
+    logo: "logos/planetofmorocco.png",
+    link: "https://planetofmorocco.com",
     role: "Web Marketing Manager / Développeur Web",
     period: "Déc. 2021 — Juin 2022",
     location: "Fès, Maroc",
@@ -177,6 +185,8 @@ const experiences = [
   },
   {
     company: "AMA Détergents",
+    logo: "logos/amadetergent.jpg",
+    link: "https://enosis.ma/histoire/",
     role: "Ingénieur Qualité Junior",
     period: "Juil. 2021 — Août 2021",
     location: "El Jadida, Maroc",
@@ -186,6 +196,7 @@ const experiences = [
     tags: ["Qualité", "PLC"],
   },
 ];
+
 
 const projects = [
   {
@@ -555,6 +566,36 @@ function HyperspaceBg() {
   );
 }
 
+const CompanyAvatar = ({ name, logo, link }) => {
+  const initials =
+    (name.match(/\b[A-ZÀ-ÖØ-Ý]/g) || [])
+      .slice(0, 2)
+      .join("") || name.slice(0, 2).toUpperCase();
+
+  const Wrapper = link ? "a" : "div";
+  const wrapperProps = link
+    ? { href: link, target: "_blank", rel: "noopener noreferrer", title: name }
+    : { title: name };
+
+  return (
+    <Wrapper {...wrapperProps} className="shrink-0">
+      <div className="h-10 w-10 rounded-xl overflow-hidden bg-white border border-slate-200 shadow-sm grid place-items-center">
+        {logo ? (
+          <img
+            src={logo}
+            alt={name}
+            loading="lazy"
+            className="h-8 w-8 object-contain"
+          />
+        ) : (
+          <span className="text-xs font-semibold text-slate-600">{initials}</span>
+        )}
+      </div>
+    </Wrapper>
+  );
+};
+
+
 // === MAIN COMPONENT ===
 export default function App() {
   
@@ -839,23 +880,47 @@ const handleLogout = async () => {
           <div className="space-y-4">
             {experiences.map((exp, idx) => (
               <GlassCard key={idx}>
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{exp.role} — <span className="text-slate-700">{exp.company}</span></h3>
-                    <div className="text-sm text-slate-600">{exp.period} • {exp.location}</div>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {exp.tags.map((t) => (
-                      <Badge key={t}>{t}</Badge>
-                    ))}
-                  </div>
-                </div>
-                <ul className="mt-3 list-disc list-inside space-y-1 text-slate-800">
-                  {exp.bullets.map((b, i) => (
-                    <li key={i}>{b}</li>
-                  ))}
-                </ul>
-              </GlassCard>
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+    <div className="flex items-start gap-3">
+      <CompanyAvatar name={exp.company} logo={exp.logo} link={exp.link} />
+      <div>
+        <h3 className="text-lg font-semibold text-slate-900">
+          {exp.role} —{" "}
+          <span className="text-slate-700">
+            {exp.link ? (
+              <a
+                href={exp.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                {exp.company}
+              </a>
+            ) : (
+              exp.company
+            )}
+          </span>
+        </h3>
+        <div className="text-sm text-slate-600">
+          {exp.period} • {exp.location}
+        </div>
+      </div>
+    </div>
+
+    <div className="flex flex-wrap gap-1 mt-2 md:mt-0">
+      {exp.tags.map((t) => (
+        <Badge key={t}>{t}</Badge>
+      ))}
+    </div>
+  </div>
+
+  <ul className="mt-3 list-disc list-inside space-y-1 text-slate-800">
+    {exp.bullets.map((b, i) => (
+      <li key={i}>{b}</li>
+    ))}
+  </ul>
+</GlassCard>
+
             ))}
           </div>
         </section>
