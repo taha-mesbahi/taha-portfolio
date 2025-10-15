@@ -567,10 +567,21 @@ function HyperspaceBg() {
 }
 
 const CompanyAvatar = ({ name, logo, link }) => {
+  const [failed, setFailed] = React.useState(false);
+
+  // Détecte le base path (Vite/CRA/GH Pages)
+  const base =
+    (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) ||
+    (typeof process !== "undefined" && process.env?.PUBLIC_URL) ||
+    "/";
+
+  const resolved = logo?.startsWith("http")
+    ? logo
+    : base + logo.replace(/^\/+/, ""); // évite le // au milieu
+
   const initials =
-    (name.match(/\b[A-ZÀ-ÖØ-Ý]/g) || [])
-      .slice(0, 2)
-      .join("") || name.slice(0, 2).toUpperCase();
+    (name.match(/\b[A-ZÀ-ÖØ-Ý]/g) || []).slice(0, 2).join("") ||
+    name.slice(0, 2).toUpperCase();
 
   const Wrapper = link ? "a" : "div";
   const wrapperProps = link
@@ -580,12 +591,13 @@ const CompanyAvatar = ({ name, logo, link }) => {
   return (
     <Wrapper {...wrapperProps} className="shrink-0">
       <div className="h-10 w-10 rounded-xl overflow-hidden bg-white border border-slate-200 shadow-sm grid place-items-center">
-        {logo ? (
+        {logo && !failed ? (
           <img
-            src={logo}
+            src={resolved}
             alt={name}
             loading="lazy"
             className="h-8 w-8 object-contain"
+            onError={() => setFailed(true)} // fallback initiales si 404
           />
         ) : (
           <span className="text-xs font-semibold text-slate-600">{initials}</span>
@@ -594,6 +606,7 @@ const CompanyAvatar = ({ name, logo, link }) => {
     </Wrapper>
   );
 };
+
 
 
 // === MAIN COMPONENT ===
