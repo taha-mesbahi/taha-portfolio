@@ -1079,17 +1079,40 @@ const handleLogout = async () => {
         <section id="education" className="py-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <GlassCard>
-              <div className="flex items-center gap-2 mb-2"><GraduationCap className="h-5 w-5 text-slate-700" /><h2 className="text-2xl font-bold text-slate-900">Éducation</h2></div>
-              <ul className="mt-2 space-y-2">
-                {education.map((e, i) => (
-                  <li key={i}>
-                    <div className="font-semibold text-slate-900">{e.school}</div>
-                    <div className="text-slate-800">{e.degree}</div>
-                    <div className="text-sm text-slate-600">{e.period}</div>
-                  </li>
-                ))}
-              </ul>
-            </GlassCard>
+  <div className="flex items-center gap-2 mb-2">
+    <GraduationCap className="h-5 w-5 text-slate-700" />
+    <h2 className="text-2xl font-bold text-slate-900">Éducation</h2>
+  </div>
+
+  <ul className="mt-2 space-y-3">
+    {education.map((e, i) => (
+      <li key={i} className="flex items-start gap-3">
+        {e.logo && (
+          <CompanyAvatar name={e.school} logo={e.logo} link={e.link} />
+        )}
+        <div>
+          <div className="font-semibold text-slate-900">
+            {e.link ? (
+              <a
+                href={e.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                {e.school}
+              </a>
+            ) : (
+              e.school
+            )}
+          </div>
+          <div className="text-slate-800">{e.degree}</div>
+          <div className="text-sm text-slate-600">{e.period}</div>
+        </div>
+      </li>
+    ))}
+  </ul>
+</GlassCard>
+
             <GlassCard>
               <div className="flex items-center gap-2 mb-2"><Languages className="h-5 w-5 text-slate-700" /><h2 className="text-2xl font-bold text-slate-900">Langues</h2></div>
               <ul className="mt-2 space-y-2">
