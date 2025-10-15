@@ -817,12 +817,15 @@ const handleLogout = async () => {
     </button>
   )}
 
-  <button
-    onClick={downloadPDF}
-    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-3 py-2 text-sm font-semibold shadow-sm hover:bg-slate-800"
-  >
-    <Download className="h-4 w-4" /> Télécharger PDF
-  </button>
+<a
+  href="https://firebasestorage.googleapis.com/v0/b/authentif-portfolio-tm-github.firebasestorage.app/o/cv%2FCV%20Taha%20MESBAHI%20ATS%20Friendly%20FR.pdf?alt=media&token=7e53f8ef-50d0-461b-864a-2be339ec7232"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 rounded-lg font-medium shadow-md hover:opacity-90 transition-all"
+>
+  📄 Télécharger mon CV
+</a>
+
 </div>
 
         </div>
