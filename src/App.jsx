@@ -59,6 +59,7 @@ const skills = {
     "Matlab/Scilab",
     "UML",
     "Git",
+    "Firebase Storage & Auth",
     "LaTeX"
   ],
   "IoT & Industrie 4.0": [
