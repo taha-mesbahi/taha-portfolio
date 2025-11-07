@@ -91,7 +91,8 @@ const skills = {
     "Adobe Illustrator",
     "Adobe Premiere Pro",
     "WordPress",
-    "Shopify"
+    "Shopify",
+    "Blender (3D Motion)"
   ],
   "Cybersécurité & Réseau": [
     "ISO/IEC 27001",
