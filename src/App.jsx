@@ -1,10 +1,12 @@
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { auth, googleProvider } from './firebase'
 import { 
+  
   Shield, LogOut, Mail, Phone, MapPin, Linkedin, Download, 
   CheckCircle2, GraduationCap, Languages, ArrowUpRight, ArrowRight, 
-  ExternalLink, Terminal, FileText, Cpu, Briefcase, Layers, 
-  MessageCircle, Send, Globe, Database, Code, Zap, Award
+  ExternalLink, Terminal, FileText, Cpu, Briefcase, Layers,
+  MessageCircle, Send, Globe, Database, Code, Zap, Award,
+  X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Image as ImageIcon
 } from "lucide-react"
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -273,26 +275,36 @@ const SEOHead = ({ lang, profile }) => {
 
 // 5 Seconds Loading Screen
 
+// Replace your existing LoadingScreen component with this one:
+
 const LoadingScreen = () => {
-return (
+    return (
         <motion.div 
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8 } }}
-            className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden"
+            className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden w-screen h-screen" // Added w-screen h-screen
         >
-            {/* CHANGE THIS LINE BELOW: Remove 'pointer-events-none' */}
-            <div className="spline-container absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-0 left-0 w-full h-full">
                 <iframe 
                     src="https://my.spline.design/nexbotrobotcharacterconcept-FDt7cww2KDcL0RxmRfz1cZG7/" 
                     frameBorder="0" 
                     width="100%" 
                     height="100%" 
                     title="Loading Robot"
-                    // OPTIONAL: Add this style to ensure the iframe grabs cursor events
-                    style={{ pointerEvents: 'auto' }} 
+                    style={{ 
+                        pointerEvents: 'auto', // Ensures touch/mouse events work
+                        width: '100vw',        // Force viewport width
+                        height: '100vh',       // Force viewport height
+                        border: 'none',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0
+                    }} 
                 />
             </div>
-            <div className="absolute bottom-16 left-0 right-0 text-center pointer-events-none px-4">
+            
+            {/* Loading Bar & Text - positioned above the iframe */}
+            <div className="absolute bottom-16 left-0 right-0 text-center pointer-events-none px-4 z-10">
                 <div className="inline-flex flex-col items-center gap-3">
                     <div className="text-[#81D8D0] font-mono text-xs md:text-sm tracking-[0.2em] animate-pulse">
                         SYSTEM INITIALIZATION...
@@ -423,17 +435,69 @@ export default function App() {
     } catch (e) { alert("Connexion annulée.") }
   };
 
-  // Lightbox
-  const openLightbox = (images, index=0) => setLightbox({ open:true, images, index });
-  const closeLightbox = () => setLightbox(l => ({ ...l, open:false }));
-  const nextImage = () => setLightbox(l => ({ ...l, index:(l.index + 1) % l.images.length }));
-  useEffect(() => {
-    if(lightbox.open) setZoom(1);
-    const onKey = (e) => { if(e.key === 'Escape') closeLightbox(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [lightbox]);
+  // ==========================================
+// LIGHTBOX STATE & LOGIC
+// ==========================================
+const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
+const [zoom, setZoom] = useState(1); // 1 = fit, >1 = zoomed
 
+// Reset zoom when sliding to a new image
+useEffect(() => {
+    setZoom(1);
+}, [lightbox.index]);
+
+// Keyboard Navigation
+useEffect(() => {
+    if (!lightbox.open) return;
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') prevImage();
+        if (e.key === 'ArrowRight') nextImage();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    // Disable body scroll when lightbox is open
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'unset';
+    };
+}, [lightbox.open, lightbox.images.length]); // Dependencies for closure freshness
+
+const openLightbox = (images, index = 0) => {
+    // Ensure we are passing an array, even if it's a single string
+    const imageArray = Array.isArray(images) ? images : [images];
+    setLightbox({ open: true, images: imageArray, index });
+    setZoom(1);
+};
+
+const closeLightbox = () => {
+    setLightbox(prev => ({ ...prev, open: false }));
+    setZoom(1);
+};
+
+const nextImage = (e) => {
+    if (e) e.stopPropagation();
+    setLightbox(prev => ({
+        ...prev,
+        index: (prev.index + 1) % prev.images.length
+    }));
+};
+
+const prevImage = (e) => {
+    if (e) e.stopPropagation();
+    setLightbox(prev => ({
+        ...prev,
+        index: (prev.index - 1 + prev.images.length) % prev.images.length
+    }));
+};
+
+const toggleZoom = (e) => {
+    if (e) e.stopPropagation();
+    setZoom(prev => (prev === 1 ? 2.5 : 1));
+};
   // Filters
   const filteredCerts = useMemo(() => {
     return certifications.filter((c) => (domain === "Tous" ? true : c.domain === domain))
@@ -768,6 +832,100 @@ export default function App() {
              <p className="text-xs text-zinc-700 uppercase tracking-widest">System Online • Designed by T. Mesbahi • {new Date().getFullYear()}</p>
         </footer>
       </main>
+
+      {/* ==========================================
+    FULL FEATURED LIGHTBOX COMPONENT
+   ========================================== */}
+<AnimatePresence>
+    {lightbox.open && (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center"
+            onClick={closeLightbox} // Click background to close
+        >
+            {/* --- TOP CONTROLS --- */}
+            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 pointer-events-none">
+                {/* Counter */}
+                <div className="pointer-events-auto bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-zinc-300">
+                    {lightbox.index + 1} / {lightbox.images.length}
+                </div>
+
+                {/* Toolbar */}
+                <div className="pointer-events-auto flex items-center gap-2">
+                    <button 
+                        onClick={toggleZoom} 
+                        className="p-2.5 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors"
+                        title="Toggle Zoom"
+                    >
+                        {zoom > 1 ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
+                    </button>
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); closeLightbox(); }} 
+                        className="p-2.5 rounded-full bg-white/10 border border-white/10 text-white hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 transition-colors"
+                        title="Close (Esc)"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+            </div>
+
+            {/* --- NAVIGATION ARROWS (Only if > 1 image) --- */}
+            {lightbox.images.length > 1 && (
+                <>
+                    <button
+                        onClick={prevImage}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all hidden md:flex items-center justify-center group"
+                        title="Previous (Left Arrow)"
+                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                    >
+                        <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
+                    </button>
+
+                    <button
+                        onClick={nextImage}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all hidden md:flex items-center justify-center group"
+                        title="Next (Right Arrow)"
+                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                    >
+                        <ChevronRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                </>
+            )}
+
+            {/* --- MAIN IMAGE CONTAINER --- */}
+            <div 
+                className="relative w-full h-full flex items-center justify-center overflow-hidden p-4 md:p-10"
+                onClick={(e) => e.stopPropagation()} // Clicking container shouldn't close
+            >
+                <motion.img
+                    key={lightbox.index} // Triggers animation on change
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: zoom }}
+                    transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
+                    src={lightbox.images[lightbox.index]}
+                    alt="Project Preview"
+                    className={`
+                        max-w-full max-h-full object-contain shadow-2xl rounded-sm
+                        ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'}
+                    `}
+                    onClick={toggleZoom}
+                    draggable={zoom > 1} // Allows native dragging if zoomed in
+                    onDragStart={(e) => { if(zoom === 1) e.preventDefault() }}
+                />
+            </div>
+
+            {/* --- CAPTION / HINT (Mobile only) --- */}
+            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none md:hidden">
+                <span className="text-[10px] text-white/50 bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">
+                    Tap to zoom • Swipe not supported
+                </span>
+            </div>
+        </motion.div>
+    )}
+</AnimatePresence>
 
       <style>{`
         ::-webkit-scrollbar { width: 6px; }
