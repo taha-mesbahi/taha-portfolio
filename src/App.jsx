@@ -36,13 +36,13 @@ const stats = [
 ];
 
 const skills = {
-  "Data & Analytics": [ "Excel avancé", "SQL (MySQL/PSQL)", "BigQuery", "GCP", "Looker", "Spotfire", "Power BI", "AppSheet", "IBM SPSS", "SAP (S/4HANA, BTP)" ],
+  "Data & Analytics": [ "Excel avancé", "SQL (MySQL/PSQL)", "BigQuery", "GCP", "Looker", "Spotfire", "Power BI", "AppSheet", "IBM SPSS", "SAP (S/4HANA, BTP)", "QuickWit", "RipGrep" ],
   "Développement & Full‑Stack": [ "Node.js", "PHP", "Vue.js", "JavaScript", "TypeScript", "HTML", "CSS", "C", "Java", "Matlab/Scilab", "UML", "Git", "Firebase Storage & Auth", "LaTeX" ],
   "IoT & Industrie 4.0": [ "Node‑RED", "OPC UA", "Arduino", "Capteurs Keyence/Schneider", "Automatisation de flux", "PLC (Siemens/Schneider)", "LTspice / Digital Works", "Step7, WinCC", "Grafana", ],
   "Automatisation & No-Code": [ "n8n", "Zapier", "Automatisation de workflows", "AppSheet" ],
-  "IA & Conversationnels": [ "IA prompting", "VAPI", "Twilio", "ElevenLabs", "Agents conversationnels" ],
-  "UX & Design": [ "Figma", "Adobe Illustrator", "Adobe Premiere Pro", "WordPress", "Shopify", "Blender" ],
-  "Cybersécurité & Réseau": [ "ISO/IEC 27001", "RGPD / GDPR", "SOC 2 / NIS", "OSINT", "Wireshark", "GNU/Linux Hardening", "Kali Suite" ],
+  "IA & Conversationnels": [ "llamaIndex", "IA prompting", "VAPI", "Twilio", "ElevenLabs", "Agents conversationnels" ],
+  "UX & Design": [ "Figma", "Adobe Illustrator", "Adobe Premiere Pro", "WordPress", "Shopify", "Blender", "MapBox GL" ],
+  "Cybersécurité & Réseau": [ "ISO/IEC 27001", "RGPD / GDPR", "SOC 2 / NIS", "OSINT", "Wireshark", "GNU/Linux Hardening", "Kali Suite", "CloudFlare Firewall" , "DDoS multi-layered attacks" ],
   "Gestion de projet": [ "Six Sigma", "Lean", "Scrum", "PMP", "DMAIC", "AMDEC", "ISO 9001:2015" ],
   "Soft skills": [ "Leadership", "Communication", "Médiation", "Gestion du temps", "Adaptabilité" ]
 };
