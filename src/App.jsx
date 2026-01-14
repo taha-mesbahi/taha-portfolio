@@ -226,13 +226,13 @@ const education = [
 ];
 
 const skills = {
-  "Data & Analytics": [ "Excel avancé", "SQL (MySQL/PSQL)", "BigQuery", "GCP", "Looker", "Spotfire", "Power BI", "AppSheet", "IBM SPSS", "SAP (S/4HANA, BTP)" ],
+  "Data & Analytics": [ "Excel avancé", "SQL (MySQL/PSQL)", "BigQuery", "GCP", "Looker", "Spotfire", "Power BI", "AppSheet", "IBM SPSS", "SAP (S/4HANA, BTP)", "QuickWit", "RipGrep" ],
   "Développement": [ "Node.js", "PHP", "Vue.js", "JavaScript", "TypeScript", "HTML", "CSS", "C", "Java", "Matlab/Scilab", "UML", "Git", "Firebase", "LaTeX" ],
   "IoT & Industrie 4.0": [ "Node‑RED", "OPC UA", "Arduino", "Capteurs Keyence", "Automatisation", "PLC (Siemens/Schneider)", "Step7, WinCC", "Grafana" ],
   "Automatisation": [ "n8n", "Zapier", "Workflows", "AppSheet" ],
-  "IA & Chatbots": [ "IA prompting", "VAPI", "Twilio", "ElevenLabs", "Agents conversationnels" ],
-  "UX & Design": [ "Figma", "Adobe Illustrator", "Adobe Premiere Pro", "WordPress", "Shopify", "Blender" ],
-  "Cybersécurité": [ "ISO/IEC 27001", "RGPD", "SOC 2", "OSINT", "Wireshark", "GNU/Linux Hardening", "Windows Hardening", "Kali Suite" ],
+  "IA & Chatbots": [ "LlamaIndex", "IA prompting", "VAPI", "Twilio", "ElevenLabs", "Agents conversationnels" ],
+  "UX & Design": [ "Figma", "Adobe Illustrator", "Adobe Premiere Pro", "WordPress", "Shopify", "Blender", "MapBox GL" ],
+  "Cybersécurité": [ "ISO/IEC 27001", "RGPD", "SOC 2", "OSINT", "Wireshark", "GNU/Linux Hardening", "Windows Hardening", "Kali Suite", "CloudFlare Firewall", "DDoS multi-layered attacks" ],
   "Gestion de projet": [ "Six Sigma", "Lean", "Agile/Scrum", "PMP", "DMAIC", "AMDEC", "5S", "Kaizen", "ISO 9001" ],
   "Soft skills": [ "Leadership", "Communication", "Médiation", "Gestion du temps", "Adaptabilité", "Pédagogie" ]
 };
