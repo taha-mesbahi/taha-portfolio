@@ -277,25 +277,27 @@ const SEOHead = ({ lang, profile }) => {
 
 // Replace your existing LoadingScreen component with this one:
 
+// 5 Seconds Loading Screen (Fixed for iPhone/iOS)
 const LoadingScreen = () => {
     return (
         <motion.div 
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8 } }}
-            // Added w-screen h-screen to force full viewport on mobile
-            className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden w-screen h-screen" 
+            className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden" 
         >
-            <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute inset-0 w-full h-full">
                 <iframe 
                     src="https://my.spline.design/nexbotrobotcharacterconcept-FDt7cww2KDcL0RxmRfz1cZG7/" 
                     frameBorder="0" 
                     width="100%" 
                     height="100%" 
                     title="Loading Robot"
+                    // vvv IMPORTANT: This allows WebGL/Sensors on mobile vvv
+                    allow="fullscreen; accelerometer; gyroscope; magnetometer; execution-while-out-of-viewport; execution-while-not-rendered"
                     style={{ 
-                        pointerEvents: 'auto', // Ensures interaction (mouse tracking) works
-                        width: '100vw', 
-                        height: '100vh', 
+                        pointerEvents: 'auto', 
+                        width: '100%', 
+                        height: '100%', 
                         border: 'none',
                         position: 'absolute',
                         top: 0,
@@ -323,7 +325,6 @@ const LoadingScreen = () => {
         </motion.div>
     );
 };
-
 const DarkGlassCard = ({ className = "", children, hoverEffect = true }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
