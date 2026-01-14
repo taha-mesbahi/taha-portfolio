@@ -272,15 +272,25 @@ const SEOHead = ({ lang, profile }) => {
 // ==========================================
 
 // 5 Seconds Loading Screen
+
 const LoadingScreen = () => {
-    return (
+return (
         <motion.div 
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8 } }}
             className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden"
         >
-            <div className="spline-container absolute top-0 left-0 w-full h-full pointer-events-none">
-                <iframe src="https://my.spline.design/nexbotrobotcharacterconcept-FDt7cww2KDcL0RxmRfz1cZG7/" frameBorder="0" width="100%" height="100%" title="Loading Robot" />
+            {/* CHANGE THIS LINE BELOW: Remove 'pointer-events-none' */}
+            <div className="spline-container absolute top-0 left-0 w-full h-full">
+                <iframe 
+                    src="https://my.spline.design/nexbotrobotcharacterconcept-FDt7cww2KDcL0RxmRfz1cZG7/" 
+                    frameBorder="0" 
+                    width="100%" 
+                    height="100%" 
+                    title="Loading Robot"
+                    // OPTIONAL: Add this style to ensure the iframe grabs cursor events
+                    style={{ pointerEvents: 'auto' }} 
+                />
             </div>
             <div className="absolute bottom-16 left-0 right-0 text-center pointer-events-none px-4">
                 <div className="inline-flex flex-col items-center gap-3">
