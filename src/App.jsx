@@ -1,13 +1,20 @@
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { auth, googleProvider } from './firebase'
-import { Shield, LogOut, Moon, Sun, Mail, Phone, MapPin, Linkedin, Download, CheckCircle2, GraduationCap, Languages, ArrowUpRight, ArrowRight, ExternalLink, Terminal, FileText } from "lucide-react"
+import { 
+  Shield, LogOut, Mail, Phone, MapPin, Linkedin, Download, 
+  CheckCircle2, GraduationCap, Languages, ArrowUpRight, ArrowRight, 
+  ExternalLink, Terminal, FileText, Cpu, Briefcase, Layers, 
+  MessageCircle, Send, Globe, Database, Code, Zap
+} from "lucide-react"
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from './firebase';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
-// === DATA ===
+// === DATA (Inchangé) ===
 const profile = {
   name: "Taha Mesbahi",
   title: "Ingénieur Data & Transformation Digitale — Industrie 4.0",
@@ -15,6 +22,7 @@ const profile = {
   location: "Rouen, Normandie, France",
   email: "tahamesbahi123@gmail.com",
   phone: "+33 6 99 72 31 51",
+  whatsapp: "33699723151", // Format international sans le +
   linkedin: "https://www.linkedin.com/in/tahamesbahi",
   availability: "Ouvert aux opportunités — alternance / CDI",
   cvUrl: "https://firebasestorage.googleapis.com/v0/b/authentif-portfolio-tm-github.firebasestorage.app/o/cv%2FCV%20Taha%20MESBAHI%20ATS%20Friendly%20FR.pdf?alt=media&token=7e53f8ef-50d0-461b-864a-2be339ec7232"
@@ -123,7 +131,6 @@ const education = [
 
 const languages = [ { name: "Français", level: "C1 (DALF)" }, { name: "Anglais", level: "C2 (TOEIC 980)" }, { name: "Arabe", level: "B2" } ];
 
-// Liste complète restaurée
 const certifications = [
   { title: "ISO/IEC 27001 Information Security Associate™", org: "SkillFront", date: "2025", domain: "Sécurité" },
   { title: "ISO 9001:2015 — QMS", org: "Alison", date: "2024", domain: "Qualité" },
@@ -163,7 +170,44 @@ const certifications = [
 
 // === UI COMPONENTS ===
 
-// 1. Dark Glass Card (Theming)
+// 1. Loading Page (Spline)
+const LoadingScreen = ({ onFinish }) => {
+    return (
+        <motion.div 
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 1 } }}
+            className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden"
+        >
+            <div className="spline-container absolute top-0 left-0 w-full h-full">
+                <iframe 
+                    src="https://my.spline.design/nexbotrobotcharacterconcept-FDt7cww2KDcL0RxmRfz1cZG7/" 
+                    frameBorder="0" 
+                    width="100%" 
+                    height="100%" 
+                    className="w-full h-full pointer-events-none md:pointer-events-auto"
+                    title="Loading Robot"
+                />
+            </div>
+            
+            <div className="absolute bottom-10 left-0 right-0 text-center pointer-events-none">
+                <div className="inline-flex flex-col items-center gap-2">
+                    <div className="text-[#81D8D0] font-mono text-sm tracking-[0.2em] animate-pulse">INITIALISATION DU SYSTÈME...</div>
+                    <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+                        <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 3.5, ease: "easeInOut" }}
+                            className="h-full bg-[#81D8D0]"
+                        />
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+
+// 2. Dark Glass Card (Theming)
 const DarkGlassCard = ({ className = "", children, hoverEffect = true }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -188,7 +232,7 @@ const DarkGlassCard = ({ className = "", children, hoverEffect = true }) => (
   </motion.div>
 );
 
-// 2. Badges
+// 3. Badges
 const Badge = ({ children, variant = "default" }) => {
     const styles = {
         default: "bg-white/5 border-white/10 text-zinc-300 hover:border-[#81D8D0]/30 hover:text-[#81D8D0]",
@@ -202,7 +246,7 @@ const Badge = ({ children, variant = "default" }) => {
   );
 }
 
-// 3. Background
+// 4. Background
 const CyberBackground = () => (
     <>
       <div className="fixed inset-0 bg-[#050505] z-[-2]"></div>
@@ -225,11 +269,8 @@ const CyberBackground = () => (
 
 const CompanyAvatar = ({ name, logo, link }) => {
     const [failed, setFailed] = React.useState(false);
-    
-    // Fallback pour les chemins relatifs si besoin
     const base = (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) || "/";
     const resolved = logo?.startsWith("http") ? logo : base + logo?.replace(/^\/+/, "");
-
     const Wrapper = link ? "a" : "div";
     const wrapperProps = link ? { href: link, target: "_blank", rel: "noopener noreferrer", title: name } : { title: name };
   
@@ -249,6 +290,7 @@ const CompanyAvatar = ({ name, logo, link }) => {
 // === MAIN APP ===
 export default function App() {
   
+  const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [user, setUser] = useState(null);
@@ -256,6 +298,13 @@ export default function App() {
   const [zoom, setZoom] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [domain, setDomain] = useState("Tous");
+  const cvRef = useRef(null);
+
+  // Loading Simulation
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 3800); // 3.8s pour laisser le temps au robot d'apparaître
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const q = query(collection(db,'projects'), orderBy('featured','desc'), orderBy('createdAt','desc'));
@@ -280,7 +329,6 @@ export default function App() {
     } catch (e) { alert("Connexion annulée.") }
   };
 
-  // Lightbox Logic
   const openLightbox = (images, index=0) => setLightbox({ open:true, images, index });
   const closeLightbox = () => setLightbox(l => ({ ...l, open:false }));
   const nextImage = () => setLightbox(l => ({ ...l, index:(l.index + 1) % l.images.length }));
@@ -292,37 +340,56 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [lightbox]);
 
-  // Filtering Certs
   const filteredCerts = useMemo(() => {
     return certifications.filter((c) => (domain === "Tous" ? true : c.domain === domain))
       .filter((c) => searchTerm.trim() ? (c.title + c.org).toLowerCase().includes(searchTerm.toLowerCase()) : true);
   }, [searchTerm, domain]);
   const domains = ["Tous", ...Array.from(new Set(certifications.map((c) => c.domain)))];
 
-
   return (
     <div className="min-h-screen w-full text-zinc-300 font-sans selection:bg-[#81D8D0] selection:text-black overflow-x-hidden">
+      
+      {/* Loading Screen */}
+      <AnimatePresence>
+        {loading && <LoadingScreen />}
+      </AnimatePresence>
+
       <CyberBackground />
 
       {/* --- NAVBAR --- */}
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center animate-fade-in print:hidden">
         <div className="bg-[#121212]/80 backdrop-blur-xl border border-white/10 rounded-full px-2 py-2 flex items-center gap-1 shadow-2xl">
-           <a href="#about" onClick={scrollToId('about')} className="px-4 py-2 rounded-full text-xs font-medium hover:bg-white/10 hover:text-white transition-all">Profile</a>
+           <a href="#about" onClick={scrollToId('about')} className="px-4 py-2 rounded-full text-xs font-medium hover:bg-white/10 hover:text-white transition-all flex items-center gap-1"><Terminal size={12} className="opacity-50"/> Profile</a>
            <a href="#projects" onClick={scrollToId('projects')} className="px-4 py-2 rounded-full text-xs font-medium hover:bg-white/10 hover:text-white transition-all">Work</a>
-           <a href="#skills" onClick={scrollToId('skills')} className="px-4 py-2 rounded-full text-xs font-medium hover:bg-white/10 hover:text-white transition-all">Skills</a>
+           <a href="#experience" onClick={scrollToId('experience')} className="px-4 py-2 rounded-full text-xs font-medium hover:bg-white/10 hover:text-white transition-all">Exp</a>
+           <a href="#skills" onClick={scrollToId('skills')} className="px-4 py-2 rounded-full text-xs font-medium hover:bg-white/10 hover:text-white transition-all">Stack</a>
+           
            <div className="h-4 w-px bg-white/10 mx-1"></div>
+
            <a href={profile.linkedin} target="_blank" className="p-2 rounded-full hover:bg-white/10 hover:text-[#0077b5] transition-colors"><Linkedin size={14} /></a>
            <button onClick={handleAdminClick} className="p-2 rounded-full hover:bg-white/10 hover:text-red-400 transition-colors"><Shield size={14} /></button>
-           <a href="#contact" onClick={scrollToId('contact')} className="ml-1 px-5 py-2 rounded-full bg-[#81D8D0] text-black text-xs font-bold hover:brightness-110 shadow-[0_0_15px_-3px_rgba(129,216,208,0.4)] transition-all">
-             Contact
+           
+           <a href="#contact" onClick={scrollToId('contact')} className="ml-1 px-5 py-2 rounded-full bg-[#81D8D0] text-black text-xs font-bold hover:brightness-110 shadow-[0_0_15px_-3px_rgba(129,216,208,0.4)] transition-all flex items-center gap-2">
+             <Send size={12} /> Contact
            </a>
         </div>
       </nav>
 
+      {/* --- FLOATING WHATSAPP BUTTON --- */}
+      <a 
+        href={`https://wa.me/${profile.whatsapp}`} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-40 bg-[#25D366] text-white p-4 rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:scale-110 hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 print:hidden flex items-center justify-center"
+        title="Chat sur WhatsApp"
+      >
+        <MessageCircle size={28} fill="white" />
+      </a>
+
       {/* --- CONTENT --- */}
       <main className="mx-auto max-w-7xl px-6 pt-32 pb-20 print:bg-white print:text-black print:pt-0">
         
-        {/* HERO */}
+        {/* HERO SECTION */}
         <section id="about" className="mb-24 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
            <div className="lg:col-span-7 order-2 lg:order-1">
              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#81D8D0]/20 bg-[#81D8D0]/5 text-[#81D8D0] text-[10px] font-mono mb-6 animate-fade-in">
@@ -338,7 +405,7 @@ export default function App() {
              </h1>
              <p className="text-lg text-zinc-400 font-light max-w-xl leading-relaxed mb-8">{profile.subtitle}</p>
              <div className="flex flex-wrap gap-4">
-                <a href="#projects" className="group flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-medium text-sm hover:scale-105 transition-transform">
+                <a href="#projects" onClick={scrollToId('projects')} className="group flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-medium text-sm hover:scale-105 transition-transform">
                   <span>Voir les projets</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </a>
@@ -350,7 +417,7 @@ export default function App() {
            </div>
            <div className="lg:col-span-5 order-1 lg:order-2">
               <DarkGlassCard className="tiffany-glow">
-                 <h3 className="text-white font-medium flex items-center gap-2 mb-4"><Terminal size={16} className="text-[#81D8D0]"/> Impact Metrics</h3>
+                 <h3 className="text-white font-medium flex items-center gap-2 mb-4"><Zap size={16} className="text-[#81D8D0]"/> Impact Metrics</h3>
                  <div className="grid grid-cols-2 gap-4">
                     {stats.map(s => (
                         <div key={s.label} className="p-3 rounded-xl bg-white/5 border border-white/5">
@@ -366,12 +433,15 @@ export default function App() {
         {/* SKILLS */}
         <section id="skills" className="mb-24 pt-10 border-t border-white/5">
             <h2 className="text-3xl text-white font-medium mb-8 flex items-center gap-3">
-                <span className="w-8 h-[1px] bg-[#81D8D0]"></span> Technical Stack
+                <Cpu size={24} className="text-[#81D8D0]"/> Technical Stack
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.entries(skills).map(([group, items]) => (
                     <DarkGlassCard key={group} className="hover:border-[#81D8D0]/30 transition-colors">
-                        <h3 className="text-zinc-100 font-medium mb-4 text-sm uppercase tracking-wider text-[#81D8D0]">{group}</h3>
+                        <h3 className="text-zinc-100 font-medium mb-4 text-sm uppercase tracking-wider text-[#81D8D0] flex items-center gap-2">
+                            {group.includes('Data') ? <Database size={14}/> : group.includes('Dev') ? <Code size={14}/> : <Layers size={14}/>} 
+                            {group}
+                        </h3>
                         <div className="flex flex-wrap gap-2">
                             {items.map(it => <Badge key={it} variant="default">{it}</Badge>)}
                         </div>
@@ -380,17 +450,17 @@ export default function App() {
             </div>
         </section>
 
-        {/* EXPERIENCE (With Company Icons) */}
+        {/* EXPERIENCE */}
         <section id="experience" className="mb-24 pt-10 border-t border-white/5">
-            <h2 className="text-3xl text-white font-medium mb-12">Experience Timeline</h2>
+            <h2 className="text-3xl text-white font-medium mb-12 flex items-center gap-3">
+                <Briefcase size={24} className="text-[#81D8D0]"/> Experience Timeline
+            </h2>
             <div className="relative border-l border-white/10 ml-6 space-y-12">
                 {experiences.map((exp, idx) => (
                     <div key={idx} className="relative pl-12">
                         <span className="absolute -left-[5px] top-4 h-2.5 w-2.5 rounded-full bg-[#81D8D0] shadow-[0_0_10px_#81D8D0]"></span>
-                        
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-2">
                            <div className="flex items-center gap-4 mb-2 md:mb-0">
-                               {/* Company Icon Rendered Here */}
                                <CompanyAvatar name={exp.company} logo={exp.logo} link={exp.link} />
                                <div>
                                    <h3 className="text-xl text-white font-medium">{exp.role}</h3>
@@ -401,12 +471,11 @@ export default function App() {
                            </div>
                            <span className="text-xs font-mono text-zinc-500 bg-white/5 px-2 py-1 rounded border border-white/5 w-fit h-fit self-start">{exp.period}</span>
                         </div>
-                        
                         <p className="text-sm text-zinc-500 mb-4 pl-[4.5rem] md:pl-0">{exp.location}</p>
                         <ul className="text-zinc-400 text-sm leading-relaxed space-y-2 list-disc ml-4 marker:text-zinc-600">
                            {exp.bullets.map((b,i) => <li key={i}>{b}</li>)}
                         </ul>
-                        <div className="flex gap-2 mt-4 flex-wrap">
+                        <div className="flex gap-2 mt-4 flex-wrap pl-[4.5rem] md:pl-0">
                             {exp.tags.map(t => <Badge key={t} variant="cyan">{t}</Badge>)}
                         </div>
                     </div>
@@ -414,10 +483,12 @@ export default function App() {
             </div>
         </section>
 
-        {/* PROJECTS (With Impact & Thumbnails) */}
+        {/* PROJECTS */}
         <section id="projects" className="mb-24 pt-10 border-t border-white/5">
             <div className="flex items-end justify-between mb-10">
-                <h2 className="text-3xl text-white font-medium">Selected Work</h2>
+                <h2 className="text-3xl text-white font-medium flex items-center gap-3">
+                    <Globe size={24} className="text-[#81D8D0]"/> Selected Work
+                </h2>
                 <div className="text-sm text-zinc-500">Live & Deployed</div>
             </div>
             
@@ -446,7 +517,7 @@ export default function App() {
                                 </div>
                             )}
 
-                            {/* Impact Section Restored */}
+                            {/* Impact */}
                             {Array.isArray(p.impact) && p.impact.length > 0 && (
                                 <div className="mb-4 pt-3 border-t border-white/5">
                                     <div className="text-[10px] uppercase tracking-wider text-[#81D8D0] font-medium mb-1">Impact</div>
@@ -456,7 +527,7 @@ export default function App() {
                                 </div>
                             )}
 
-                            {/* PDF Thumbnails Restored */}
+                            {/* PDF Thumbnails */}
                             {Array.isArray(p.pdfs) && p.pdfs.length > 0 && (
                                 <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-white/5">
                                     {p.pdfs.map((pdf, i) => (
@@ -489,7 +560,7 @@ export default function App() {
             </div>
         </section>
 
-        {/* EDUCATION & CERTS (All Certs Restored) */}
+        {/* EDUCATION & CERTS */}
         <section id="education" className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10 border-t border-white/5">
             <div>
                  <h2 className="text-2xl text-white font-medium mb-6 flex items-center gap-2"><GraduationCap className="text-[#81D8D0]"/> Education</h2>
@@ -516,7 +587,6 @@ export default function App() {
                         {domains.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                  </div>
-                 {/* Scrollable list for extensive certificates */}
                  <div className="space-y-2 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                     {filteredCerts.map((c, i) => (
                         <div key={i} className="flex justify-between items-center p-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/5 transition-colors group">
@@ -531,14 +601,62 @@ export default function App() {
             </div>
         </section>
 
-        {/* FOOTER */}
-        <footer className="mt-24 pt-10 border-t border-white/5 text-center pb-24">
-             <div className="flex justify-center gap-6 mb-6">
-                 <a href={`mailto:${profile.email}`} className="text-zinc-500 hover:text-white transition-colors"><Mail size={18}/></a>
-                 <a href={profile.linkedin} target="_blank" className="text-zinc-500 hover:text-white transition-colors"><Linkedin size={18}/></a>
-                 <a href={`tel:${profile.phone}`} className="text-zinc-500 hover:text-white transition-colors"><Phone size={18}/></a>
+        {/* CONTACT SECTION IMPROVED */}
+        <section id="contact" className="mt-24 pt-10 border-t border-white/5 pb-24">
+             <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 className="text-3xl text-white font-medium mb-4">Initialize Connection</h2>
+                    <p className="text-zinc-400 mb-8 font-light">
+                        Disponible pour de nouveaux projets, missions freelance ou opportunités de carrière.
+                        N'hésitez pas à me contacter via l'un des canaux sécurisés ci-dessous.
+                    </p>
+                    <div className="space-y-4">
+                        <a href={`mailto:${profile.email}`} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-[#81D8D0]/30 hover:bg-white/10 transition-all group">
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-[#81D8D0] group-hover:bg-[#81D8D0]/10 transition-colors">
+                                <Mail size={18}/>
+                            </div>
+                            <div>
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider">Email</div>
+                                <div className="text-zinc-200 font-mono text-sm">{profile.email}</div>
+                            </div>
+                        </a>
+                        
+                        <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-[#25D366]/30 hover:bg-white/10 transition-all group">
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-[#25D366] group-hover:bg-[#25D366]/10 transition-colors">
+                                <MessageCircle size={18}/>
+                            </div>
+                            <div>
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider">WhatsApp</div>
+                                <div className="text-zinc-200 font-mono text-sm">+33 6 99 72 31 51</div>
+                            </div>
+                        </a>
+
+                        <a href={profile.linkedin} target="_blank" className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-[#0077b5]/30 hover:bg-white/10 transition-all group">
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-[#0077b5] group-hover:bg-[#0077b5]/10 transition-colors">
+                                <Linkedin size={18}/>
+                            </div>
+                            <div>
+                                <div className="text-xs text-zinc-500 uppercase tracking-wider">LinkedIn</div>
+                                <div className="text-zinc-200 font-mono text-sm">/in/tahamesbahi</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div className="relative h-full min-h-[300px] rounded-2xl overflow-hidden bg-white/5 border border-white/5 flex items-center justify-center">
+                    {/* Abstract Map or Visual */}
+                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#81D8D0] via-transparent to-transparent"></div>
+                    <div className="text-center z-10">
+                        <MapPin size={40} className="text-[#81D8D0] mx-auto mb-4 animate-bounce"/>
+                        <h3 className="text-white text-xl font-medium">Basé en Normandie</h3>
+                        <p className="text-zinc-500 text-sm">Rouen • Paris • Remote</p>
+                    </div>
+                </div>
              </div>
-             <p className="text-xs text-zinc-700 uppercase tracking-widest">Designed by T. Mesbahi • {new Date().getFullYear()}</p>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="border-t border-white/5 text-center py-10">
+             <p className="text-xs text-zinc-700 uppercase tracking-widest">System Online • Designed by T. Mesbahi • {new Date().getFullYear()}</p>
         </footer>
       </main>
 
