@@ -282,7 +282,8 @@ const LoadingScreen = () => {
         <motion.div 
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8 } }}
-            className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden w-screen h-screen" // Added w-screen h-screen
+            // Added w-screen h-screen to force full viewport on mobile
+            className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden w-screen h-screen" 
         >
             <div className="absolute top-0 left-0 w-full h-full">
                 <iframe 
@@ -292,9 +293,9 @@ const LoadingScreen = () => {
                     height="100%" 
                     title="Loading Robot"
                     style={{ 
-                        pointerEvents: 'auto', // Ensures touch/mouse events work
-                        width: '100vw',        // Force viewport width
-                        height: '100vh',       // Force viewport height
+                        pointerEvents: 'auto', // Ensures interaction (mouse tracking) works
+                        width: '100vw', 
+                        height: '100vh', 
                         border: 'none',
                         position: 'absolute',
                         top: 0,
@@ -303,7 +304,6 @@ const LoadingScreen = () => {
                 />
             </div>
             
-            {/* Loading Bar & Text - positioned above the iframe */}
             <div className="absolute bottom-16 left-0 right-0 text-center pointer-events-none px-4 z-10">
                 <div className="inline-flex flex-col items-center gap-3">
                     <div className="text-[#81D8D0] font-mono text-xs md:text-sm tracking-[0.2em] animate-pulse">
@@ -392,8 +392,11 @@ export default function App() {
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [user, setUser] = useState(null);
-  const [lightbox, setLightbox] = useState({ open:false, images:[], index:0 });
+  
+  // Lightbox State
+  const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
   const [zoom, setZoom] = useState(1);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [domain, setDomain] = useState("Tous");
   const cvRef = useRef(null);
@@ -403,6 +406,7 @@ export default function App() {
   const experiencesData = getExperiences(lang);
   const displayStats = t.stats;
 
+  // Initialization
   useEffect(() => {
     const browserLang = navigator.language || navigator.userLanguage;
     if (browserLang.startsWith('fr')) setLang('fr');
@@ -420,6 +424,24 @@ export default function App() {
     return () => { clearTimeout(timer); unsub(); authUnsub(); }
   }, []);
 
+  // Lightbox Logic
+  useEffect(() => {
+    if(lightbox.open) setZoom(1);
+    const onKey = (e) => { 
+        if(e.key === 'Escape') closeLightbox();
+        if(e.key === 'ArrowRight') nextImage();
+        if(e.key === 'ArrowLeft') prevImage();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightbox]);
+
+  const openLightbox = (images, index=0) => setLightbox({ open:true, images: Array.isArray(images) ? images : [images], index });
+  const closeLightbox = () => { setLightbox(prev => ({...prev, open:false})); setZoom(1); };
+  const nextImage = (e) => { if(e) e.stopPropagation(); setLightbox(l => ({...l, index:(l.index + 1) % l.images.length})); setZoom(1); };
+  const prevImage = (e) => { if(e) e.stopPropagation(); setLightbox(l => ({...l, index:(l.index - 1 + l.images.length) % l.images.length})); setZoom(1); };
+  const toggleZoom = (e) => { if(e) e.stopPropagation(); setZoom(z => z === 1 ? 2.5 : 1); };
+
   const toggleLang = () => setLang(prev => prev === 'fr' ? 'en' : 'fr');
   
   const scrollToId = (id) => (e) => {
@@ -435,70 +457,6 @@ export default function App() {
     } catch (e) { alert("Connexion annulée.") }
   };
 
-  // ==========================================
-// LIGHTBOX STATE & LOGIC
-// ==========================================
-const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
-const [zoom, setZoom] = useState(1); // 1 = fit, >1 = zoomed
-
-// Reset zoom when sliding to a new image
-useEffect(() => {
-    setZoom(1);
-}, [lightbox.index]);
-
-// Keyboard Navigation
-useEffect(() => {
-    if (!lightbox.open) return;
-
-    const handleKeyDown = (e) => {
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowLeft') prevImage();
-        if (e.key === 'ArrowRight') nextImage();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    // Disable body scroll when lightbox is open
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-        document.body.style.overflow = 'unset';
-    };
-}, [lightbox.open, lightbox.images.length]); // Dependencies for closure freshness
-
-const openLightbox = (images, index = 0) => {
-    // Ensure we are passing an array, even if it's a single string
-    const imageArray = Array.isArray(images) ? images : [images];
-    setLightbox({ open: true, images: imageArray, index });
-    setZoom(1);
-};
-
-const closeLightbox = () => {
-    setLightbox(prev => ({ ...prev, open: false }));
-    setZoom(1);
-};
-
-const nextImage = (e) => {
-    if (e) e.stopPropagation();
-    setLightbox(prev => ({
-        ...prev,
-        index: (prev.index + 1) % prev.images.length
-    }));
-};
-
-const prevImage = (e) => {
-    if (e) e.stopPropagation();
-    setLightbox(prev => ({
-        ...prev,
-        index: (prev.index - 1 + prev.images.length) % prev.images.length
-    }));
-};
-
-const toggleZoom = (e) => {
-    if (e) e.stopPropagation();
-    setZoom(prev => (prev === 1 ? 2.5 : 1));
-};
-  // Filters
   const filteredCerts = useMemo(() => {
     return certifications.filter((c) => (domain === "Tous" ? true : c.domain === domain))
       .filter((c) => searchTerm.trim() ? (c.title + c.org).toLowerCase().includes(searchTerm.toLowerCase()) : true);
@@ -517,10 +475,9 @@ const toggleZoom = (e) => {
 
       <CyberBackground />
 
-      {/* --- RESPONSIVE SCROLLABLE NAVBAR --- */}
+      {/* --- NAVBAR --- */}
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center animate-fade-in print:hidden px-4">
         <div className="bg-[#121212]/85 backdrop-blur-xl border border-white/10 rounded-full px-1.5 py-1.5 flex items-center gap-1 shadow-2xl max-w-full overflow-x-auto no-scrollbar">
-           
            <a href="#about" onClick={scrollToId('about')} className="px-3 md:px-4 py-2 rounded-full text-[10px] md:text-xs font-medium hover:bg-white/10 hover:text-white transition-all flex items-center gap-1 whitespace-nowrap">
              <Terminal size={12} className="opacity-50"/> {t.nav.profile}
            </a>
@@ -533,41 +490,31 @@ const toggleZoom = (e) => {
            <a href="#skills" onClick={scrollToId('skills')} className="px-3 md:px-4 py-2 rounded-full text-[10px] md:text-xs font-medium hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">
              {t.nav.stack}
            </a>
-           
            <div className="h-4 w-px bg-white/10 mx-1 shrink-0"></div>
-
            <button onClick={toggleLang} className="p-2 rounded-full hover:bg-white/10 hover:text-[#81D8D0] transition-colors shrink-0" title="Switch Language">
               <Languages size={14} />
            </button>
-
            <a href={profileData.linkedin} target="_blank" className="p-2 rounded-full hover:bg-white/10 hover:text-[#0077b5] transition-colors shrink-0">
              <Linkedin size={14} />
            </a>
            <button onClick={handleAdminClick} className="p-2 rounded-full hover:bg-white/10 hover:text-red-400 transition-colors shrink-0">
              <Shield size={14} />
            </button>
-           
            <a href="#contact" onClick={scrollToId('contact')} className="ml-1 px-4 md:px-5 py-2 rounded-full bg-[#81D8D0] text-black text-[10px] md:text-xs font-bold hover:brightness-110 shadow-[0_0_15px_-3px_rgba(129,216,208,0.4)] transition-all flex items-center gap-2 whitespace-nowrap shrink-0">
              <Send size={12} /> {t.nav.contact}
            </a>
         </div>
       </nav>
 
-      {/* --- FLOATING WHATSAPP BUTTON --- */}
-      <a 
-        href={`https://wa.me/${profileData.whatsapp}`} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 bg-[#25D366] text-white p-3 md:p-4 rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:scale-110 hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 print:hidden flex items-center justify-center"
-        title="Chat sur WhatsApp"
-      >
+      {/* --- FLOATING WHATSAPP --- */}
+      <a href={`https://wa.me/${profileData.whatsapp}`} target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 z-40 bg-[#25D366] text-white p-3 md:p-4 rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:scale-110 hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] transition-all duration-300 print:hidden flex items-center justify-center" title="Chat sur WhatsApp">
         <MessageCircle className="w-6 h-6 md:w-7 md:h-7" fill="white" />
       </a>
 
-      {/* --- CONTENT WRAPPER --- */}
+      {/* --- CONTENT --- */}
       <main className="mx-auto max-w-7xl px-4 md:px-6 pt-28 md:pt-32 pb-20 print:bg-white print:text-black print:pt-0">
         
-        {/* HERO SECTION */}
+        {/* HERO */}
         <section id="about" className="mb-20 md:mb-24 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
            <div className="lg:col-span-7 order-2 lg:order-1">
              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#81D8D0]/20 bg-[#81D8D0]/5 text-[#81D8D0] text-[10px] font-mono mb-6 animate-fade-in">
@@ -577,14 +524,11 @@ const toggleZoom = (e) => {
                 </span>
                 {t.availability}
              </div>
-             
              <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1] mb-6">
                <span className="block text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/50">{profileData.name}</span>
                <span className="text-xl md:text-2xl lg:text-3xl text-zinc-500 font-light block mt-3">{profileData.title}</span>
              </h1>
-             
              <p className="text-base md:text-lg text-zinc-400 font-light max-w-xl leading-relaxed mb-8">{profileData.subtitle}</p>
-             
              <div className="flex flex-wrap gap-4">
                 <a href="#projects" onClick={scrollToId('projects')} className="group flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-medium text-sm hover:scale-105 transition-transform">
                   <span>{t.viewProjects}</span>
@@ -596,7 +540,6 @@ const toggleZoom = (e) => {
                 </a>
              </div>
            </div>
-           
            <div className="lg:col-span-5 order-1 lg:order-2">
               <DarkGlassCard className="tiffany-glow">
                  <h3 className="text-white font-medium flex items-center gap-2 mb-4"><Zap size={16} className="text-[#81D8D0]"/> {t.impact}</h3>
@@ -761,7 +704,6 @@ const toggleZoom = (e) => {
                         {domains.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                  </div>
-                 {/* Scrollable container for certificates */}
                  <div className="space-y-2 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                     {filteredCerts.map((c, i) => (
                         <div key={i} className="flex justify-between items-center p-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/5 transition-colors group">
@@ -833,99 +775,62 @@ const toggleZoom = (e) => {
         </footer>
       </main>
 
-      {/* ==========================================
-    FULL FEATURED LIGHTBOX COMPONENT
-   ========================================== */}
-<AnimatePresence>
-    {lightbox.open && (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center"
-            onClick={closeLightbox} // Click background to close
-        >
-            {/* --- TOP CONTROLS --- */}
-            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 pointer-events-none">
-                {/* Counter */}
-                <div className="pointer-events-auto bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-zinc-300">
-                    {lightbox.index + 1} / {lightbox.images.length}
-                </div>
-
-                {/* Toolbar */}
-                <div className="pointer-events-auto flex items-center gap-2">
-                    <button 
-                        onClick={toggleZoom} 
-                        className="p-2.5 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors"
-                        title="Toggle Zoom"
-                    >
-                        {zoom > 1 ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
-                    </button>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); closeLightbox(); }} 
-                        className="p-2.5 rounded-full bg-white/10 border border-white/10 text-white hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 transition-colors"
-                        title="Close (Esc)"
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-            </div>
-
-            {/* --- NAVIGATION ARROWS (Only if > 1 image) --- */}
-            {lightbox.images.length > 1 && (
-                <>
-                    <button
-                        onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all hidden md:flex items-center justify-center group"
-                        title="Previous (Left Arrow)"
-                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                    >
-                        <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
-                    </button>
-
-                    <button
-                        onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all hidden md:flex items-center justify-center group"
-                        title="Next (Right Arrow)"
-                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                    >
-                        <ChevronRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                </>
-            )}
-
-            {/* --- MAIN IMAGE CONTAINER --- */}
-            <div 
-                className="relative w-full h-full flex items-center justify-center overflow-hidden p-4 md:p-10"
-                onClick={(e) => e.stopPropagation()} // Clicking container shouldn't close
+      {/* --- LIGHTBOX --- */}
+      <AnimatePresence>
+        {lightbox.open && (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center"
+                onClick={closeLightbox}
             >
-                <motion.img
-                    key={lightbox.index} // Triggers animation on change
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: zoom }}
-                    transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-                    src={lightbox.images[lightbox.index]}
-                    alt="Project Preview"
-                    className={`
-                        max-w-full max-h-full object-contain shadow-2xl rounded-sm
-                        ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'}
-                    `}
-                    onClick={toggleZoom}
-                    draggable={zoom > 1} // Allows native dragging if zoomed in
-                    onDragStart={(e) => { if(zoom === 1) e.preventDefault() }}
-                />
-            </div>
+                {/* Controls */}
+                <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 pointer-events-none">
+                    <div className="pointer-events-auto bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-zinc-300">
+                        {lightbox.index + 1} / {lightbox.images.length}
+                    </div>
+                    <div className="pointer-events-auto flex items-center gap-2">
+                        <button onClick={toggleZoom} className="p-2.5 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-colors" title="Zoom">
+                            {zoom > 1 ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); closeLightbox(); }} className="p-2.5 rounded-full bg-white/10 border border-white/10 text-white hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 transition-colors" title="Close">
+                            <X size={18} />
+                        </button>
+                    </div>
+                </div>
 
-            {/* --- CAPTION / HINT (Mobile only) --- */}
-            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none md:hidden">
-                <span className="text-[10px] text-white/50 bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">
-                    Tap to zoom • Swipe not supported
-                </span>
-            </div>
-        </motion.div>
-    )}
-</AnimatePresence>
+                {/* Arrows */}
+                {lightbox.images.length > 1 && (
+                    <>
+                        <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all hidden md:flex items-center justify-center group" title="Prev">
+                            <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
+                        </button>
+                        <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/20 hover:scale-110 transition-all hidden md:flex items-center justify-center group" title="Next">
+                            <ChevronRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                    </>
+                )}
+
+                {/* Image */}
+                <div className="relative w-full h-full flex items-center justify-center overflow-hidden p-4 md:p-10" onClick={(e) => e.stopPropagation()}>
+                    <motion.img
+                        key={lightbox.index}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: zoom }}
+                        transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
+                        src={lightbox.images[lightbox.index]}
+                        alt="Preview"
+                        className={`max-w-full max-h-full object-contain shadow-2xl rounded-sm ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'}`}
+                        onClick={toggleZoom}
+                        draggable={zoom > 1}
+                        onDragStart={(e) => { if(zoom === 1) e.preventDefault() }}
+                    />
+                </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
 
       <style>{`
         ::-webkit-scrollbar { width: 6px; }
@@ -934,7 +839,6 @@ const toggleZoom = (e) => {
         ::-webkit-scrollbar-thumb:hover { background: #81D8D0; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         
-        /* Hide scrollbar for nav but allow scrolling */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
