@@ -15,7 +15,61 @@ import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from './firebase';
 import html2canvas from "html2canvas"; // Kept if you need custom capture
 import jsPDF from "jspdf"; // Kept if you need custom capture
+import emailjs from '@emailjs/browser';
 
+// --- VISITOR TRACKER COMPONENT ---
+const VisitorTracker = () => {
+  useEffect(() => {
+    const trackVisitor = async () => {
+      // Prevent spam: Check session storage
+      if (sessionStorage.getItem('visitor_alert_sent')) return;
+
+      try {
+        // 1. Get IP & Geo Data
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+
+        // 2. Get Device Info
+        const userAgent = navigator.userAgent;
+        const isMobile = /Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(userAgent);
+        const deviceType = isMobile ? "📱 Mobile" : "💻 Desktop";
+
+        // 3. Prepare Email Params
+        const templateParams = {
+          to_name: "Taha",
+          ip_address: data.ip,
+          location: `${data.city}, ${data.region}, ${data.country_name}`,
+          flag: `https://flagcdn.com/w320/${data.country_code.toLowerCase()}.png`,
+          isp: data.org,
+          device: deviceType,
+          os: navigator.platform,
+          browser: navigator.userAgent,
+          time: new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
+          maps_link: `https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`
+        };
+
+        // 4. Send Email (Replace placeholders!)
+        await emailjs.send(
+          'taha.mesbahi76@gmail.com',      // e.g. service_gmail
+          'template_n9jqfjl',     // e.g. template_visitor_alert
+          templateParams,
+          'SI63r7YmQK6CHMTre'       // e.g. user_123456789
+        );
+
+        // 5. Mark as sent
+        sessionStorage.setItem('visitor_alert_sent', 'true');
+        console.log("Visitor tracked 🚀");
+
+      } catch (error) {
+        console.error("Tracking Error:", error);
+      }
+    };
+
+    trackVisitor();
+  }, []);
+
+  return null; // Invisible component
+};
 // ==========================================
 // 1. TRANSLATIONS & DATA
 // ==========================================
@@ -468,6 +522,7 @@ export default function App() {
     <div className="min-h-screen w-full text-zinc-300 font-sans selection:bg-[#81D8D0] selection:text-black overflow-x-hidden">
       
       <SEOHead lang={lang} profile={profileData} />
+      <VisitorTracker />
       <SchemaMarkup profile={profileData} />
 
       <AnimatePresence>
