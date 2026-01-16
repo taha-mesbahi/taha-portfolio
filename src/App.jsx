@@ -437,13 +437,14 @@ const CompanyAvatar = ({ name, logo, link }) => {
 };
 // --- COMPOSANT SPOTIFY FLOTTANT ---
 // --- COMPOSANT SPOTIFY FLOTTANT ---
+// --- COMPOSANT SPOTIFY OFFICIEL (IFRAME) ---
 const SpotifyPlayer = () => {
-  const [isOpen, setIsOpen] = useState(false); // Fermé par défaut
+  const [isOpen, setIsOpen] = useState(false); // Commence fermé
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex items-end gap-3 font-sans print:hidden">
       
-      {/* Le Lecteur (s'affiche uniquement si isOpen est true) */}
+      {/* Le Lecteur (Apparaît au clic) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -453,22 +454,22 @@ const SpotifyPlayer = () => {
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="origin-bottom-left"
           >
-            {/* Conteneur Glassmorphism */}
-            <div className="bg-[#121212]/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl w-[300px] md:w-[350px]">
+            <div className="bg-black/80 backdrop-blur-md border border-white/10 p-2 rounded-2xl shadow-2xl w-[300px] md:w-[350px]">
               
-              {/* IFRAME SPOTIFY MODIFIÉE */}
+              {/* ⚠️ IMPORTANT : Remplace le lien 'src' ci-dessous par le lien de TA playlist.
+                 1. Va sur ta playlist Spotify > Partager > Intégrer la playlist
+                 2. Copie l'URL qui est à l'intérieur de src="..."
+              */}
               <iframe 
                 style={{ borderRadius: "12px" }} 
-                // 👇 J'ai mis le vrai lien de ta playlist "Suburban vibes TM"
-                src="https://open.spotify.com/embed/playlist/2FKrJetMZE3fipIirSuWlx?utm_source=generator&theme=0" 
+                src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator&theme=0" 
                 width="100%" 
-                // 👇 Hauteur réglée à 80px pour le mode "Compact" (Barre de lecture uniquement)
                 height="80" 
                 frameBorder="0" 
                 allowFullScreen="" 
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
                 loading="lazy"
-                title="Spotify Player"
+                title="Spotify"
               ></iframe>
 
             </div>
@@ -476,7 +477,7 @@ const SpotifyPlayer = () => {
         )}
       </AnimatePresence>
 
-      {/* Bouton Toggle (Ouvrir/Fermer) */}
+      {/* Bouton pour Ouvrir/Fermer */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.3)]
@@ -486,14 +487,9 @@ const SpotifyPlayer = () => {
           }
         `}
         whileTap={{ scale: 0.9 }}
-        title={isOpen ? "Fermer le lecteur" : "Ouvrir la musique"}
       >
-        {isOpen ? (
-          <X size={20} />
-        ) : (
-          // Note : Assure-toi d'avoir importé l'icône Music de lucide-react (ajoutée ci-dessous pour sûreté)
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        )}
+        {isOpen ? <X size={20} /> : <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>} 
+        {/* Note: J'ai mis une icône +/x générique au cas où Music n'est pas importé, mais l'idéal est <Music /> si importé */}
       </motion.button>
     </div>
   );
