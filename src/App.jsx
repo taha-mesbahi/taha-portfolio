@@ -435,7 +435,66 @@ const CompanyAvatar = ({ name, logo, link }) => {
       </Wrapper>
     );
 };
+// --- COMPOSANT SPOTIFY FLOTTANT ---
+const SpotifyPlayer = () => {
+  const [isOpen, setIsOpen] = useState(false); // Fermé par défaut pour ne pas encombrer
 
+  return (
+    <div className="fixed bottom-6 left-6 z-50 flex items-end gap-3 font-sans print:hidden">
+      
+      {/* Le Lecteur (s'affiche uniquement si isOpen est true) */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, x: -20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.9, x: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="origin-bottom-left"
+          >
+            {/* Conteneur Glassmorphism */}
+            <div className="bg-[#121212]/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl w-[300px] md:w-[350px]">
+              
+              {/* IFRAME SPOTIFY */}
+              {/* J'ai mis height=80 pour le mode "Compact". Remplacez src par le lien EMBED de votre playlist */}
+              <iframe 
+                style={{ borderRadius: "12px" }} 
+                src="https://open.spotify.com/embed/playlist/YOUR_PLAYLIST_ID?utm_source=generator&theme=0" 
+                width="100%" 
+                height="80" 
+                frameBorder="0" 
+                allowFullScreen="" 
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                loading="lazy"
+                title="Spotify Player"
+              ></iframe>
+
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bouton Toggle (Ouvrir/Fermer) */}
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.3)]
+          ${isOpen 
+            ? "bg-white text-black border-white rotate-90" 
+            : "bg-[#1db954] border-[#1db954] text-black hover:scale-110 hover:shadow-[0_0_20px_#1db954]" // Vert Spotify
+          }
+        `}
+        whileTap={{ scale: 0.9 }}
+        title={isOpen ? "Fermer le lecteur" : "Ouvrir la musique"}
+      >
+        {isOpen ? (
+          <X size={20} />
+        ) : (
+          <Music size={20} fill="currentColor" />
+        )}
+      </motion.button>
+    </div>
+  );
+};
 // ==========================================
 // 4. MAIN APP
 // ==========================================
@@ -522,6 +581,7 @@ export default function App() {
       
       <SEOHead lang={lang} profile={profileData} />
       <VisitorTracker />
+      <SpotifyPlayer />
       <SchemaMarkup profile={profileData} />
 
       <AnimatePresence>
