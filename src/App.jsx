@@ -436,8 +436,9 @@ const CompanyAvatar = ({ name, logo, link }) => {
     );
 };
 // --- COMPOSANT SPOTIFY FLOTTANT ---
+// --- COMPOSANT SPOTIFY FLOTTANT ---
 const SpotifyPlayer = () => {
-  const [isOpen, setIsOpen] = useState(false); // Fermé par défaut pour ne pas encombrer
+  const [isOpen, setIsOpen] = useState(false); // Fermé par défaut
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex items-end gap-3 font-sans print:hidden">
@@ -455,12 +456,13 @@ const SpotifyPlayer = () => {
             {/* Conteneur Glassmorphism */}
             <div className="bg-[#121212]/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl w-[300px] md:w-[350px]">
               
-              {/* IFRAME SPOTIFY */}
-              {/* J'ai mis height=80 pour le mode "Compact". Remplacez src par le lien EMBED de votre playlist */}
+              {/* IFRAME SPOTIFY MODIFIÉE */}
               <iframe 
                 style={{ borderRadius: "12px" }} 
-                src="https://open.spotify.com/embed/playlist/YOUR_PLAYLIST_ID?utm_source=generator&theme=0" 
+                // 👇 J'ai mis le vrai lien de ta playlist "Suburban vibes TM"
+                src="https://open.spotify.com/embed/playlist/2v99Q1d0BwEv1lO8iG3b6E?utm_source=generator&theme=0" 
                 width="100%" 
+                // 👇 Hauteur réglée à 80px pour le mode "Compact" (Barre de lecture uniquement)
                 height="80" 
                 frameBorder="0" 
                 allowFullScreen="" 
@@ -489,7 +491,8 @@ const SpotifyPlayer = () => {
         {isOpen ? (
           <X size={20} />
         ) : (
-          <Music size={20} fill="currentColor" />
+          // Note : Assure-toi d'avoir importé l'icône Music de lucide-react (ajoutée ci-dessous pour sûreté)
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         )}
       </motion.button>
     </div>
