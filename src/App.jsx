@@ -436,7 +436,37 @@ const CompanyAvatar = ({ name, logo, link }) => {
       </Wrapper>
     );
 };
+// --- UNICORN STUDIO BACKGROUND ---
+const UnicornBackground = () => {
+  useEffect(() => {
+    // Check if script is already present to avoid duplicates
+    if (document.getElementById('unicorn-studio-script')) return;
 
+    const script = document.createElement("script");
+    script.id = 'unicorn-studio-script';
+    script.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js";
+    script.async = true;
+    script.onload = () => {
+       if (window.UnicornStudio) {
+          window.UnicornStudio.init();
+       }
+    };
+    document.body.appendChild(script);
+
+    // Cleanup not strictly necessary for global scripts but good practice
+    return () => {
+      // We generally leave global scripts, but if you change pages you might want to cleanup.
+      // For this portfolio, leaving it is fine.
+    };
+  }, []);
+
+  return (
+    <div 
+      data-us-project="X0ErZR3QhPzMHfKgBbJJ" 
+      className="fixed top-0 left-0 -z-10 w-full h-full pointer-events-none" // Changed to 'fixed' and added pointer-events-none
+    ></div>
+  );
+};
 // ==========================================
 // 4. MAIN APP
 // ==========================================
@@ -530,7 +560,7 @@ export default function App() {
         {loading && <LoadingScreen />}
       </AnimatePresence>
 
-      <CyberBackground />
+     <UnicornBackground />
 
       {/* --- NAVBAR --- */}
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center animate-fade-in print:hidden px-4">
