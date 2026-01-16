@@ -15,6 +15,7 @@ import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from './firebase';
 import html2canvas from "html2canvas"; // Kept if you need custom capture
 import jsPDF from "jspdf"; // Kept if you need custom capture
+import MusicPlayer from './MusicPlayer';
 import emailjs from '@emailjs/browser';
 
 // --- VISITOR TRACKER COMPONENT ---
@@ -522,6 +523,7 @@ export default function App() {
       
       <SEOHead lang={lang} profile={profileData} />
       <VisitorTracker />
+      <MusicPlayer />
       <SchemaMarkup profile={profileData} />
 
       <AnimatePresence>
