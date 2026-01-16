@@ -435,65 +435,7 @@ const CompanyAvatar = ({ name, logo, link }) => {
       </Wrapper>
     );
 };
-// --- COMPOSANT SPOTIFY FLOTTANT ---
-// --- COMPOSANT SPOTIFY FLOTTANT ---
-// --- COMPOSANT SPOTIFY OFFICIEL (IFRAME) ---
-const SpotifyPlayer = () => {
-  const [isOpen, setIsOpen] = useState(false); // Commence fermé
 
-  return (
-    <div className="fixed bottom-6 left-6 z-50 flex items-end gap-3 font-sans print:hidden">
-      
-      {/* Le Lecteur (Apparaît au clic) */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, x: -20 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.9, x: -20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="origin-bottom-left"
-          >
-            <div className="bg-black/80 backdrop-blur-md border border-white/10 p-2 rounded-2xl shadow-2xl w-[300px] md:w-[350px]">
-              
-              {/* ⚠️ IMPORTANT : Remplace le lien 'src' ci-dessous par le lien de TA playlist.
-                 1. Va sur ta playlist Spotify > Partager > Intégrer la playlist
-                 2. Copie l'URL qui est à l'intérieur de src="..."
-              */}
-              <iframe 
-                style={{ borderRadius: "12px" }} 
-                src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator&theme=0" 
-                width="100%" 
-                height="80" 
-                frameBorder="0" 
-                allowFullScreen="" 
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                loading="lazy"
-                title="Spotify"
-              ></iframe>
-
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Bouton pour Ouvrir/Fermer */}
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.3)]
-          ${isOpen 
-            ? "bg-white text-black border-white rotate-90" 
-            : "bg-[#1db954] border-[#1db954] text-black hover:scale-110 hover:shadow-[0_0_20px_#1db954]" // Vert Spotify
-          }
-        `}
-        whileTap={{ scale: 0.9 }}
-      >
-        {isOpen ? <X size={20} /> : <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>} 
-        {/* Note: J'ai mis une icône +/x générique au cas où Music n'est pas importé, mais l'idéal est <Music /> si importé */}
-      </motion.button>
-    </div>
-  );
-};
 // ==========================================
 // 4. MAIN APP
 // ==========================================
@@ -580,7 +522,6 @@ export default function App() {
       
       <SEOHead lang={lang} profile={profileData} />
       <VisitorTracker />
-      <SpotifyPlayer />
       <SchemaMarkup profile={profileData} />
 
       <AnimatePresence>
