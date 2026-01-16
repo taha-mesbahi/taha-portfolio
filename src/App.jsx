@@ -460,7 +460,7 @@ const SpotifyPlayer = () => {
               <iframe 
                 style={{ borderRadius: "12px" }} 
                 // 👇 J'ai mis le vrai lien de ta playlist "Suburban vibes TM"
-                src="https://open.spotify.com/embed/playlist/2v99Q1d0BwEv1lO8iG3b6E?utm_source=generator&theme=0" 
+                src="https://open.spotify.com/embed/playlist/2FKrJetMZE3fipIirSuWlx?utm_source=generator&theme=0" 
                 width="100%" 
                 // 👇 Hauteur réglée à 80px pour le mode "Compact" (Barre de lecture uniquement)
                 height="80" 
