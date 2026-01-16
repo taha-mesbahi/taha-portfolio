@@ -560,7 +560,8 @@ export default function App() {
         {loading && <LoadingScreen />}
       </AnimatePresence>
 
-     <UnicornBackground />
+      <CyberBackground />
+   
 
       {/* --- NAVBAR --- */}
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center animate-fade-in print:hidden px-4">
